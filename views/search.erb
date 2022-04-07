@@ -1,5 +1,54 @@
+<%# Search form script %>
+<script src="scripts/search_form.js"></script>
 <%# Search form %>
-<form action=""></form>
+<div class="py-4 text-center">
+  <p class="h2 text-dark">
+    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-search" viewBox="0 0 25 25">
+      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+    </svg>
+    Search
+  </p>
+  <p class="lead mx-4">Search for plants using any number of filters. Plant names are not required.</p>
+</div>
+<form action="/plants" method="get">
+  <div class="container">
+    <div class="row gy-3">
+      <div class="col-sm-6 col-12">
+        <label for="common-name">Common Name</label>
+        <input type="text" name="common-name" id="common-name" class="form-control" placeholder="Yarrow">
+      </div>
+      <div class="col-sm-6 col-12">
+        <label for="scientific-name">Scientific Name</label>
+        <input type="text" name="scientific-name" id="scientific-name" class="form-control" placeholder="Yarrow">
+      </div>
+    </div>
+    <div class="row my-3">
+      <div class="col">
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filters" aria-expanded="false" aria-controls="filters">
+          Show More Filters
+          <svg class="filters-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="row collapse" id="filters">
+      <div class="col">Filters</div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-search" viewBox="0 0 25 25">
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+            </svg>
+            Search
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
 <%# List of plants %>
 <% if @plants %>
   <ul></ul>
