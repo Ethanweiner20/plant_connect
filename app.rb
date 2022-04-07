@@ -4,7 +4,7 @@ require 'sinatra/reloader'
 require 'tilt/erubis'
 
 get '/' do
-  redirect '/plants'
+  redirect '/search'
 end
 
 # AUTHENTICATION
@@ -13,27 +13,27 @@ get '/signup' do
 end
 
 post '/users' do
-  redirect '/plants'
+  redirect '/search'
 end
 
 get '/login' do
 end
 
 get '/users' do
-  redirect '/plants'
+  redirect '/search'
 end
 
 # SEARCH ALL PLANTS
 
 # Render plant search form (no list)
-get '/plants' do
+get '/search' do
   erb :search
 end
 
-# Render plant search form and list of matching plants
-get '/plants/:name_query' do
+get '/plants' do
+  # Temporary example data
   @plants = []
-  erb :search
+  erb :plants
 end
 
 # CUSTOM PLANTS
