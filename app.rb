@@ -2,6 +2,7 @@ require 'bundler/setup'
 require 'sinatra'
 require 'sinatra/reloader'
 require 'tilt/erubis'
+require_relative 'lib/plant.rb'
 
 get '/' do
   redirect '/search'
@@ -30,9 +31,18 @@ get '/search' do
   erb :search
 end
 
+# Search for plants and render results
 get '/plants' do
-  # Temporary example data
-  @plants = []
+  lily_data = {
+    common_name: "Lily",
+    scientific_name: "Hemerocallis"
+  }
+  hosta_data = {
+    common_name: "Hosta",
+    scientific_name: "Hosta sieboldiana"
+  }
+  @plants = [Plant.new(lily_data), Plant.new(hosta_data)]
+  puts @plants[0].image_src
   erb :plants
 end
 
