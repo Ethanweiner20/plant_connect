@@ -9,7 +9,7 @@ class USDAPlants
 
   # search : Hash of Filters, Integer -> List of Plants
   # Return a list of 10 plants, starting at `start`
-  def self.search(filters, _start=0)
+  def self.search(filters, limit: 100000, start: 0)
     filters = filters.reject { |_, value| !value || value.empty? }
     return { plants: [], last_index: 0 } if filters.empty?
 
@@ -24,7 +24,7 @@ class USDAPlants
       end
 
       # TEMPORARY
-      break if index == 20000
+      break if index >= limit
     end
 
     { plants: plants, last_index: index }
@@ -38,6 +38,22 @@ class USDAPlants
   end
 
   def self.values_match?(actual_value, search_value)
-    actual_value.strip.downcase.include?(search_value.strip.downcase)
+    if search_value.is_a? Array
+      arrays_overlap?(actual_value.split(', '), search_value)
+    else
+      strings_match?(actual_value, search_value)
+    end
+  end
+
+  def self.strings_match?(actual_string, search_string)
+    actual_string.strip.downcase.include?(search_string.strip.downcase)
+  end
+
+  def self.arrays_overlap?(actual_array, search_array)
+    search_array.any? do |search_ele|
+      actual_array.any? do |actual_ele|
+        actual_ele.downcase == search_ele.downcase
+      end
+    end
   end
 end

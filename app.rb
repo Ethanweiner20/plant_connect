@@ -41,7 +41,7 @@ get '/plants' do
   filters = params.clone
   filters.delete(:page)
 
-  result = USDAPlants.search(filters)
+  result = USDAPlants.search(filters, limit: 500)
   @plants = result[:plants]
   @last_index = result[:last_index]
 
