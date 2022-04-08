@@ -6,7 +6,7 @@ class Plant
 
   def initialize(data)
     @data = data
-    @image_src = ImageSearch.find_image_source([data["Scientific Name"], data["Common Name"]])
+    @image_src = ImageSearch.find_image_source([data["ScientificName"], data["CommonName"]])
   end
 
   def [](key)
