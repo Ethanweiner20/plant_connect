@@ -6,61 +6,69 @@ require_relative '../lib/usda_plants_api.rb'
 
 class USDAPlantsTest < MiniTest::Test
   def test_common_name
-    skip
-    assert_equal 1, USDAPlants.search({ "Common Name" => "Arizona boxelder" })[:plants].size
-    assert_equal 1, USDAPlants.search({ "Common Name" => "Arizona boxe" })[:plants].size
-    assert_equal 1, USDAPlants.search({ "Common Name" => "arizona Boxelder" })[:plants].size
-    assert_equal 7, USDAPlants.search({ "Common Name" => "Boxelder" })[:plants].size
+    assert_equal 1, USDAPlants.search({ "CommonName" => "Arizona boxelder" }, limit: 500)[:plants].size
+    assert_equal 1, USDAPlants.search({ "CommonName" => "Arizona boxe" }, limit: 500)[:plants].size
+    assert_equal 1, USDAPlants.search({ "CommonName" => "arizona Boxelder" }, limit: 500)[:plants].size
+    assert_equal 2, USDAPlants.search({ "CommonName" => "Boxelder" }, limit: 500)[:plants].size
   end
 
   def test_no_filters
-    assert_equal 0, USDAPlants.search({})[:plants].size
+    assert_equal 0, USDAPlants.search({}, limit: 500)[:plants].size
   end
 
   def test_empty_filters
-    skip
     filters = {
-      "Common Name" => "Arizona boxelder",
-      "Scientific Name" => ""
+      "CommonName" => "Arizona boxelder",
+      "ScientificName" => ""
     }
-    assert_equal 1, USDAPlants.search(filters)[:plants].size
+    assert_equal 1, USDAPlants.search(filters, limit: 500)[:plants].size
 
     filters = {
-      "Common Name" => "Arizona boxelder",
-      "Scientific Name" => nil
+      "CommonName" => "Arizona boxelder",
+      "ScientificName" => nil
     }
-    assert_equal 1, USDAPlants.search(filters)[:plants].size
+    assert_equal 1, USDAPlants.search(filters, limit: 500)[:plants].size
   end
 
   def test_multiple_filters
-    skip
     filters = {
-      "Common Name" => "Arizona boxelder",
-      "Scientific Name" => "Acer negundo L. var. arizonicum Sarg."
+      "CommonName" => "Arizona boxelder",
+      "ScientificName" => "Acer negundo var. arizonicum"
     }
 
-    assert_equal 1, USDAPlants.search(filters)[:plants].size
+    assert_equal 1, USDAPlants.search(filters, limit: 500)[:plants].size
 
     filters = {
-      "Common Name" => " boxelder",
-      "Scientific Name" => "acer"
+      "CommonName" => " boxelder",
+      "ScientificName" => "acer"
     }
 
-    assert_equal 7, USDAPlants.search(filters)[:plants].size
+    assert_equal 2, USDAPlants.search(filters, limit: 500)[:plants].size
   end
 
   def test_invalid_filters
     filters = {
       "Com Name" => " boxelder",
-      "Scientific Name" => "acer"
+      "ScientificName" => "acer"
     }
 
-    assert_raises(StandardError) { USDAPlants.search(filters)[:plants].size }
+    assert_raises(StandardError) { USDAPlants.search(filters, limit: 500)[:plants].size }
   end
 
   def test_search_limit
     filters = { "Genus" => "Acer" }
-    assert_equal USDAPlants::SEARCH_LIMIT, USDAPlants.search(filters)[:plants].size
+    assert_equal USDAPlants::SEARCH_LIMIT, USDAPlants.search(filters, limit: 500)[:plants].size
+  end
+
+  def test_multi_value_filter
+    filters = { "Genus" => "Albizia", "GrowthHabit" => ["Tree", "Shrub"] }
+    assert_equal 4, USDAPlants.search(filters, limit: 500)[:plants].size
+
+    filters = { "Genus" => "Albizia", "GrowthHabit" => ["Tree"] }
+    assert_equal 4, USDAPlants.search(filters, limit: 500)[:plants].size
+
+    filters = { "Genus" => "Albizia", "GrowthHabit" => ["Shrub"] }
+    assert_equal 1, USDAPlants.search(filters, limit: 500)[:plants].size
   end
 
   def test_offset; end
