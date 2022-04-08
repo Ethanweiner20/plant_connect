@@ -28,6 +28,6 @@ class ImageSearch
 
   def self.extract_src(response)
     query = JSON.parse(response.body)["query"]
-    return query["pages"].values[0]["imageinfo"][0]["url"] if query
+    return query["pages"].values[0]["imageinfo"][0]["url"] if query && query["pages"]
   end
 end

@@ -22,6 +22,9 @@ class USDAPlants
         plants << Plant.new(row.to_h)
         break if plants.size == SEARCH_LIMIT
       end
+
+      # TEMPORARY
+      break if index == 20000
     end
 
     { plants: plants, last_index: index }
