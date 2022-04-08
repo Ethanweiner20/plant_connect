@@ -3,6 +3,7 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'tilt/erubis'
 require_relative 'lib/plant.rb'
+require_relative 'lib/usda_plants_api.rb'
 
 get '/' do
   redirect '/search'
@@ -33,16 +34,15 @@ end
 
 # Search for plants and render results
 get '/plants' do
-  lily_data = {
-    common_name: "Lily",
-    scientific_name: "Hemerocallis"
-  }
-  hosta_data = {
-    common_name: "Hosta",
-    scientific_name: "Hosta sieboldiana"
-  }
-  @plants = [Plant.new(lily_data), Plant.new(hosta_data)]
-  puts @plants[0].image_src
+  @page = params[:page]
+
+  filters = params.clone
+  filters.delete(:page)
+
+  result = USDAPlants.search(filters)
+  @plants = result[:plants]
+  @last_index = result[:last_index]
+
   erb :plants
 end
 

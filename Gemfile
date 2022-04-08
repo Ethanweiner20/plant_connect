@@ -1,6 +1,8 @@
 source "https://rubygems.org"
 
 gem "erubis"
+gem "minitest"
+gem "minitest-reporters"
 gem "pry"
 gem "rake"
 gem "sinatra"
