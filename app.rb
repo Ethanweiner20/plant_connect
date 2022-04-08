@@ -1,6 +1,8 @@
 require 'bundler/setup'
 require 'sinatra'
 require 'sinatra/reloader'
+also_reload('lib/*.rb')
+
 require 'tilt/erubis'
 require_relative 'lib/plant.rb'
 require_relative 'lib/usda_plants_api.rb'
