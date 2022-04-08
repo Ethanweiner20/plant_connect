@@ -2,7 +2,7 @@ require 'minitest/autorun'
 require "minitest/reporters"
 Minitest::Reporters.use!
 
-require_relative '../lib/usda_plant_api.rb'
+require_relative '../lib/usda_plants_api.rb'
 
 class USDAPlantsTest < MiniTest::Test
   def test_common_name
@@ -11,6 +11,10 @@ class USDAPlantsTest < MiniTest::Test
     assert_equal 1, USDAPlants.search({ "Common Name" => "Arizona boxe" })[:plants].size
     assert_equal 1, USDAPlants.search({ "Common Name" => "arizona Boxelder" })[:plants].size
     assert_equal 7, USDAPlants.search({ "Common Name" => "Boxelder" })[:plants].size
+  end
+
+  def test_no_filters
+    assert_equal 0, USDAPlants.search({})[:plants].size
   end
 
   def test_empty_filters
