@@ -73,5 +73,19 @@ class USDAPlantsTest < MiniTest::Test
     assert_equal 1, USDAPlants.search(filters, limit: TEMPORARY_SEARCH_LIMIT)[:plants].size
   end
 
+  def test_range
+    # Question: What is the minimum precipitation the plant needs?
+    filters = { "Genus" => "Abies", "Precipitation_Minimum" => "20, 42" }
+    assert_equal 3, USDAPlants.search(filters, limit: TEMPORARY_SEARCH_LIMIT)[:plants].size
+
+    # Question: What is the maximum precipitation the plant can withstand?
+    filters = { "Genus" => "Abies", "Precipitation_Maximum" => "75, 85" }
+    assert_equal 2, USDAPlants.search(filters, limit: TEMPORARY_SEARCH_LIMIT)[:plants].size
+
+    # Return all plants whose min temperature is between the two values
+    filters = { "Genus" => "Abies", "TemperatureMinimum" => "-40, -20" }
+    assert_equal 2, USDAPlants.search(filters, limit: TEMPORARY_SEARCH_LIMIT)[:plants].size
+  end
+
   def test_offset; end
 end

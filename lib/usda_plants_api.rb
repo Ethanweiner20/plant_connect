@@ -7,6 +7,8 @@ class USDAPlants
 
   CSV_PATH = 'data/plants.csv'
 
+  NUMERICAL_FILTERS = ["Precipitation_Minimum", "Precipitation_Maximum", "TemperatureMinimum"]
+
   # search : Hash of Filters, Integer -> List of Plants
   # Return a list of 10 plants, starting at `start`
   def self.search(filters, limit: 100000, start: 0)
@@ -33,16 +35,23 @@ class USDAPlants
   def self.match?(row, filters)
     filters.all? do |key, value|
       raise "Invalid filter" unless row[key]
-      values_match?(row[key], value)
+      values_match?(key, row[key], value)
     end
   end
 
-  def self.values_match?(actual_value, search_value)
-    if search_value.is_a? Array
+  def self.values_match?(key, actual_value, search_value)
+    if NUMERICAL_FILTERS.include?(key)
+      in_range?(search_value, actual_value)
+    elsif search_value.is_a? Array
       arrays_overlap?(actual_value.split(', '), search_value)
     else
       strings_match?(actual_value, search_value)
     end
+  end
+
+  def self.in_range?(range_string, value)
+    min, max = range_string.split(', ').map(&:to_i)
+    (min..max).cover?(value.to_i)
   end
 
   def self.strings_match?(actual_string, search_string)
