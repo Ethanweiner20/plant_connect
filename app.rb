@@ -36,12 +36,14 @@ end
 
 # Search for plants and render results
 get '/plants' do
+  SEARCH_LIMIT = settings.development? ? 500 : 10000
+
   @page = params[:page]
 
   filters = params.clone
   filters.delete(:page)
 
-  result = USDAPlants.search(filters, limit: 500)
+  result = USDAPlants.search(filters, limit: SEARCH_LIMIT)
   @plants = result[:plants]
   @last_index = result[:last_index]
 
