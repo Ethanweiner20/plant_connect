@@ -7,8 +7,13 @@ require 'tilt/erubis'
 require_relative 'lib/plant.rb'
 require_relative 'lib/usda_plants_api.rb'
 
+configure do
+  enable :sessions
+  set :session_secret, "secret"
+end
+
 get '/' do
-  redirect '/search'
+  redirect '/plants'
 end
 
 # AUTHENTICATION
@@ -17,37 +22,39 @@ get '/signup' do
 end
 
 post '/users' do
-  redirect '/search'
+  redirect '/plants'
 end
 
 get '/login' do
 end
 
 get '/users' do
-  redirect '/search'
+  redirect '/plants'
 end
 
 # SEARCH ALL PLANTS
-
-# Render plant search form (no list)
-get '/search' do
-  erb :search
-end
 
 # Search for plants and render results
 get '/plants' do
   SEARCH_LIMIT = settings.development? ? 500 : 10000
 
-  @page = params[:page]
+  if params.empty?
+    erb :search
+  elsif params.values.all?(&:empty?)
+    session[:error] = "No filters were provided to the search."
+    erb :search
+  else
+    @page = params[:page]
 
-  filters = params.clone
-  filters.delete(:page)
+    filters = params.clone
+    filters.delete(:page)
 
-  result = USDAPlants.search(filters, limit: SEARCH_LIMIT)
-  @plants = result[:plants]
-  @last_index = result[:last_index]
+    result = USDAPlants.search(filters, limit: SEARCH_LIMIT)
+    @plants = result[:plants]
+    @last_index = result[:last_index]
 
-  erb :plants
+    erb(:search) + erb(:plants, layout: nil)
+  end
 end
 
 # CUSTOM PLANTS
