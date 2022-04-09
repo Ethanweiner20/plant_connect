@@ -10,7 +10,12 @@ class Plant
   end
 
   def [](key)
-    data[key]
+    data[key].empty? || data[key] == '0' ? nil : data[key]
+  end
+
+  def states
+    str = data["State"]
+    str.index('(') ? str[str.index('(') + 1...str.index(')')] : nil
   end
 
   # Provides a representative color of the plant

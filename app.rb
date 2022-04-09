@@ -12,6 +12,8 @@ configure do
   set :session_secret, "secret"
 end
 
+# HELPERS
+
 get '/' do
   redirect '/plants'
 end
