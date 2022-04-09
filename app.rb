@@ -49,12 +49,20 @@ get '/plants' do
     filters = params.clone
     filters.delete(:page)
 
-    result = USDAPlants.search(filters, limit: SEARCH_LIMIT)
+    result = USDAPlants.search(filters, max_index: SEARCH_LIMIT)
     @plants = result[:plants]
     @last_index = result[:last_index]
 
     erb(:search) + erb(:plants, layout: nil)
   end
+end
+
+# VIEW SINGULAR PLANTS
+
+get '/plants/:scientific_name' do
+  @plant = USDAPlants.find(params[:scientific_name])
+
+  erb :plant
 end
 
 # CUSTOM PLANTS

@@ -9,9 +9,20 @@ class USDAPlants
 
   NUMERICAL_FILTERS = ["Precipitation_Minimum", "Precipitation_Maximum", "TemperatureMinimum"]
 
+  # find : String -> Plant
+  # Returns a singular plant with the given `scientific_name`
+  def self.find(scientific_name)
+    result = search({ "ScientificName" => scientific_name }, limit: 1)
+    if result[:plants].length > 0
+      result[:plants][0]
+    else
+      raise "No plant found for #{scientific_name}"
+    end
+  end
+
   # search : Hash of Filters, Integer -> List of Plants
   # Return a list of 10 plants, starting at `start`
-  def self.search(filters, limit: 100000, start: 0)
+  def self.search(filters, max_index: 500, limit: SEARCH_LIMIT, start: 0)
     filters = filters.reject { |_, value| !value || value.empty? }
     return { plants: [], last_index: 0 } if filters.empty?
 
@@ -22,11 +33,11 @@ class USDAPlants
       index += 1
       if match?(row, filters)
         plants << Plant.new(row.to_h)
-        break if plants.size == SEARCH_LIMIT
+        break if plants.size == limit
       end
 
       # TEMPORARY
-      break if index >= limit
+      break if index >= max_index
     end
 
     { plants: plants, last_index: index }
@@ -34,7 +45,7 @@ class USDAPlants
 
   def self.match?(row, filters)
     filters.all? do |key, value|
-      raise "Invalid filter" unless row[key]
+      raise "Invalid filter: #{key}" unless row[key]
       values_match?(key, row[key], value)
     end
   end
