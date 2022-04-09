@@ -40,7 +40,7 @@ $(document).ready(function () {
   $("a.add-checkbox-input").click(function (event) {
     event.preventDefault();
     const inputName = $(this).attr("data-input-name");
-    const options = $(this).attr("data-options").split(",");
+    const options = $(this).attr("data-options").split(", ");
     addCheckboxInput(inputName, options);
   });
 });

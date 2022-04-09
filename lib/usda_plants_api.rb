@@ -43,7 +43,7 @@ class USDAPlants
     if NUMERICAL_FILTERS.include?(key)
       in_range?(search_value, actual_value)
     elsif search_value.is_a? Array
-      arrays_overlap?(actual_value.split(', '), search_value)
+      arrays_overlap?(actual_value.split(/(, )|( and )/), search_value)
     else
       strings_match?(actual_value, search_value)
     end

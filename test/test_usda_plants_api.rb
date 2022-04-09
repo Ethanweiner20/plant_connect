@@ -73,6 +73,14 @@ class USDAPlantsTest < MiniTest::Test
     assert_equal 1, USDAPlants.search(filters, limit: TEMPORARY_SEARCH_LIMIT)[:plants].size
   end
 
+  def test_mulit_value_filter_with_and
+    filters = { "Genus" => "Agrostis", "ActiveGrowthPeriod" => ["Spring", "Summer"] }
+    assert_equal 2, USDAPlants.search(filters, limit: TEMPORARY_SEARCH_LIMIT)[:plants].size
+
+    filters = { "Genus" => "Agrostis", "ActiveGrowthPeriod" => ["Summer"] }
+    assert_equal 2, USDAPlants.search(filters, limit: TEMPORARY_SEARCH_LIMIT)[:plants].size
+  end
+
   def test_range
     # Question: What is the minimum precipitation the plant needs?
     filters = { "Genus" => "Abies", "Precipitation_Minimum" => "20, 42" }
