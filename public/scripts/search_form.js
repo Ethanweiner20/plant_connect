@@ -1,4 +1,9 @@
 $(document).ready(function () {
+  // Show loading spinner on submission
+  $('button[type="submit"]').click(function () {
+    $(this).children(".spinner-border").css("display", "inline-block");
+  });
+
   function addTextInput(name) {
     const inputName = name.replace(/\s/g, "");
 

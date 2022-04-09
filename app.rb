@@ -53,6 +53,8 @@ get '/plants' do
 
     result = USDAPlants.search(filters, max_index: SEARCH_LIMIT)
     @plants = result[:plants]
+    session[:error] = "No plants were found." if @plants.empty?
+
     @last_index = result[:last_index]
 
     erb(:search) + erb(:plants, layout: nil)
