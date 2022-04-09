@@ -8,7 +8,7 @@
   </p>
   <p class="lead mx-4">Search for plants using any number of filters.</p>
 </div>
-<form class="plant-search">
+<form class="plant-search" action="/plants" method="get">
   <div class="container">
     <div class="row gy-4 mb-2">
       <div class="col-sm-6 col-12">
@@ -30,11 +30,6 @@
             Add a Filter
           </button>
           <ul class="dropdown-menu ">
-            <li>
-              <a class="dropdown-item add-checkbox-input" href="#" data-input-name="Growth Habit"
-                data-options="Tree, Shrub, Forb/herb, Subshrub, Vine, Graminoid, Lichenous, Nonvascular"
-              >Growth Habit</a>
-            </li>
             <li>
               <a class="dropdown-item" href="#">Taxonomy &raquo;</a>
               <ul class="dropdown-menu dropdown-submenu">
@@ -151,16 +146,46 @@
             <li>
               <a class="dropdown-item" href="#">Reproduction &raquo;</a>
               <ul class="dropdown-menu dropdown-submenu">
+                <li>
+                  <a href="#" class="dropdown-item add-checkbox-input"
+                     data-input-name="Resprout Ability"
+                     data-options="Yes, No">Resprout Ability</a>
+                </li>
+                <li>
+                  <a href="#" class="dropdown-item add-checkbox-input"
+                     data-input-name="Seed Spread Rate"
+                     data-options="None, Slow, Moderate, Rapid">Seed Spread Rate</a>
+                </li>
               </ul>
             </li>
             <li>
               <a class="dropdown-item" href="#">Physical Traits &raquo;</a>
               <ul class="dropdown-menu dropdown-submenu">
+                <li>
+                  <a class="dropdown-item add-checkbox-input" href="#" data-input-name="Growth Habit"
+                data-options="Tree, Shrub, Forb/herb, Subshrub, Vine, Graminoid, Lichenous, Nonvascular"
+              >Growth Habit</a>
+                </li>
+                <li>
+                  <a class="dropdown-item add-checkbox-input" href="#" data-input-name="Growth Form"
+                data-options="Single Stem, Multiple Stem, Single Crown, Stoloniferous, Rhizomatous, Thicket Forming, Bunch"
+              >Growth Form</a>
+                </li>
+                <li>
+                  <a class="dropdown-item add-checkbox-input" href="#" data-input-name="Foliage Texture"
+                data-options="Fine, Medium, Coarse"
+                  >Foliage Texture</a>
+                </li>
               </ul>
             </li>
             <li>
               <a class="dropdown-item" href="#">Miscellaneous &raquo;</a>
               <ul class="dropdown-menu dropdown-submenu">
+                <li>
+                  <a class="dropdown-item add-states-input" href="#" data-input-name="States"
+                    data-options="Fine, Medium, Coarse"
+                  >States</a>
+                </li>
               </ul>
             </li>
           </li>
@@ -187,4 +212,9 @@
 </div>
 </form>
 <div class="plants">
+  <% if session.key?(:search_error) %>
+    <div class="alert alert-danger" role="alert">
+      <%= session.delete(:search_error) %>
+    </div>
+  <% end %>
 </div>

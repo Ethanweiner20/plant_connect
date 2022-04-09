@@ -38,17 +38,15 @@ end
 
 # Search for plants and render results
 get '/search' do
-  SEARCH_LIMIT = settings.development? ? 500 : 10000
-
   erb :search
 end
 
 # AJAX route: Display plants
 get '/plants' do
+  SEARCH_LIMIT = settings.development? ? 500 : 10000
+
   if params.values.all?(&:empty?)
-    session[:error] = "No filters were provided to the search."
-    status 302
-    "/search"
+    erb(:alert, layout: nil, locals: { message: "No filters were provided." })
   else
     @page = params[:page]
 
@@ -60,13 +58,17 @@ get '/plants' do
 
     @last_index = result[:last_index]
 
-    erb(:plants, layout: nil)
+    if params[:inline]
+      erb(:plants)
+    else
+      erb(:plants, layout: nil)
+    end
   end
 end
 
 # VIEW SINGULAR PLANTS
 
-get '/search/:scientific_name' do
+get '/plants/:scientific_name' do
   @plant = USDAPlants.find(params[:scientific_name])
 
   erb :plant

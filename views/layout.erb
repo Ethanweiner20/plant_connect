@@ -59,7 +59,8 @@
                   Settings</a>
               </li>
             </ul>
-            <form class="d-flex" action="/search">
+            <form class="d-flex" action="/plants">
+              <input type="hidden" name="inline">
               <input class="form-control me-2" name="CommonName" type="search" placeholder="Plant Name" aria-label="Search" />
               <button class="btn btn-outline-success" type="submit">Search</button>
             </form>
@@ -69,7 +70,7 @@
     </header>
     <%# Content %>
     <main>
-      <% if session[:error] %>
+      <% if session.key?(:error) %>
         <div class="alert alert-danger" role="alert">
           <%= session.delete(:error) %>
         </div>

@@ -3,7 +3,7 @@
     <div class="row gy-3">
       <% @plants.each do |plant| %>
         <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
-          <a href="/search/<%= plant["ScientificName"] %>" class="card bg-light h-100">
+          <a href="/plants/<%= plant["ScientificName"] %>" class="card bg-light h-100">
             <% if plant.image_src %>
               <img class="card-img-top" src="<%= plant.image_src %>" alt="Plant Image" />
             <% end %>

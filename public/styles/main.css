@@ -28,3 +28,9 @@ a.card {
   height: 1.5em;
   display: none;
 }
+
+select[multiple] {
+  display: block;
+  width: 100px;
+  height: 150px;
+}
