@@ -2,18 +2,32 @@
   <div class="row gy-3">
     <% @plants.each do |plant| %>
       <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
-        <div class="card">
+        <a href="/plants/<%= plant["ScientificName"] %>" class="card">
           <% if plant.image_src %>
             <img class="card-img-top" src="<%= plant.image_src %>" alt="Plant Image" />
           <% end %>
           <div class="card-body">
             <%# Color Based on Flower Color %>
-            <h5 class="card-title"><%= plant["CommonName"] %></h5>
+            <h5 class="card-title text-success"><%= plant["CommonName"] %></h5>
             <h6 class="card-subtitle mb-2 text-muted">
               <%= plant["ScientificName"] %>
             </h6>
+            <ul>
+              <% if plant["GrowthHabit"] %>
+                <li class="text-dark">Growth Habit: <strong><%= plant["GrowthHabit"] %></strong></li>
+              <% end %>
+              <% if plant["MatureHeight"] %>
+                <li class="text-dark">Height: <strong><%= plant["MatureHeight"] %> feet</strong></li>
+              <% end %>
+              <% unless plant.colors.empty? %>
+                <li class="text-dark">Colors: <strong><%= plant.colors.join(', ') %></strong></li>
+              <% end %>
+              <% if ["Medium", "High"].include?(plant["DroughtTolerance"]) %>
+                <li class="text-dark"><strong>Drought Tolerant</strong></li>
+              <% end %>
+            </ul>
           </div>
-        </div>
+        </a>
       </div>
     <% end %>
   </div>

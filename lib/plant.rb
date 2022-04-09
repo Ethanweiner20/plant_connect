@@ -15,5 +15,7 @@ class Plant
 
   # Provides a representative color of the plant
   # Used in various display areas
-  def color; end
+  def colors
+    [data["FlowerColor"], data["FoliageColor"], data["FruitColor"]].reject(&:empty?)
+  end
 end
