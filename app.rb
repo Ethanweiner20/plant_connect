@@ -15,7 +15,7 @@ end
 # HELPERS
 
 get '/' do
-  redirect '/plants'
+  redirect '/search'
 end
 
 # AUTHENTICATION
@@ -24,27 +24,31 @@ get '/signup' do
 end
 
 post '/users' do
-  redirect '/plants'
+  redirect '/search'
 end
 
 get '/login' do
 end
 
 get '/users' do
-  redirect '/plants'
+  redirect '/search'
 end
 
 # SEARCH ALL PLANTS
 
 # Search for plants and render results
-get '/plants' do
+get '/search' do
   SEARCH_LIMIT = settings.development? ? 500 : 10000
 
-  if params.empty?
-    erb :search
-  elsif params.values.all?(&:empty?)
+  erb :search
+end
+
+# AJAX route: Display plants
+get '/plants' do
+  if params.values.all?(&:empty?)
     session[:error] = "No filters were provided to the search."
-    erb :search
+    status 302
+    "/search"
   else
     @page = params[:page]
 
@@ -53,17 +57,16 @@ get '/plants' do
 
     result = USDAPlants.search(filters, max_index: SEARCH_LIMIT)
     @plants = result[:plants]
-    session[:error] = "No plants were found." if @plants.empty?
 
     @last_index = result[:last_index]
 
-    erb(:search) + erb(:plants, layout: nil)
+    erb(:plants, layout: nil)
   end
 end
 
 # VIEW SINGULAR PLANTS
 
-get '/plants/:scientific_name' do
+get '/search/:scientific_name' do
   @plant = USDAPlants.find(params[:scientific_name])
 
   erb :plant

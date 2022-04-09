@@ -8,16 +8,40 @@
             <h2 class="text-muted"><%= @plant["ScientificName"] %></h2>
             <%= erb :plant_metadata, layout: nil, locals: { :plant => @plant } %>
           </div>
-          <div class="col-12 col-sm-6 col-md-6 col-lg-5">
-            <img class="img-fluid rounded" src="<%= @plant.image_src %>" alt="Image of plant">
-          </div>
+          <% if @plant.image_src %>
+            <div class="col-12 col-sm-6 col-md-6 col-lg-5">
+              <img class="img-fluid rounded" src="<%= @plant.image_src %>" alt="Image of plant">
+            </div>
+          <% end %>
         </div>
       </div>
     </div>
   </div>
   <div class="row align-items-stretch">
-    <div class="col-12 col-sm-6 col-md-6 col-xl-3 p-3 mb-4 rounded-3">
+    <div class="col-12 col-sm-6 col-md-6 col-lg-4 p-3 mb-4 rounded-3">
       <div class="h-100 p-3 text-white bg-dark rounded-3">
+        <h3>Taxonomy</h3>
+        <ul>
+          <% if @plant["Class"] %>
+            <li>Class: <strong><%= @plant["Class"] %></strong></li>
+          <% end %>
+          <% if @plant["Order"] %>
+            <li>Order: <strong><%= @plant["Order"] %></strong></li>
+          <% end %>
+          <% if @plant["Family"] %>
+            <li>Family: <strong><%= @plant["Family"] %></strong></li>
+          <% end %>
+          <% if @plant["Genus"] %>
+            <li>Genus: <strong><%= @plant["Genus"] %></strong></li>
+          <% end %>
+          <% if @plant["Species"] %>
+            <li>Species: <strong><%= @plant["Species"] %></strong></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-6 col-lg-4 p-3 mb-4 rounded-3">
+      <div class="h-100 p-3 text-white bg-info rounded-3">
         <h3>Timing</h3>
         <ul>
           <% if @plant["Duration"] %>
@@ -38,20 +62,7 @@
         </ul>
       </div>
     </div>
-    <div class="col-12 col-sm-6 col-md-6 col-xl-3 p-3 mb-4 rounded-3">
-      <div class="h-100 p-3 text-dark bg-warning rounded-3">
-        <h3>Reproduction</h3>
-        <ul>
-          <% if @plant["ResproutAbility"] %>
-            <li><strong><%= @plant["ResproutAbility"] == 'Yes' ? 'Can Resprout' : 'Can\'t resprout' %></strong></li>
-          <% end %>
-          <% if @plant["SeedSpreadRate"] %>
-            <li>Seed Spread Rate: <strong><%= @plant["SeedSpreadRate"] %></strong></li>
-          <% end %>
-        </ul>
-      </div>
-    </div>
-    <div class="col-12 col-sm-6 col-md-6 col-xl-3 p-3 mb-4 rounded-3">
+    <div class="col-12 col-sm-6 col-md-6 col-lg-4 p-3 mb-4 rounded-3">
       <div class="h-100 p-3 text-white bg-primary rounded-3">
         <h3>Growth Requirements</h3>
         <% if @plant["Precipitation_Minimum"] && @plant["Precipitation_Maximum"] %>
@@ -79,7 +90,20 @@
         <% end %>
       </div>
     </div>
-    <div class="col-12 col-sm-6 col-md-6 col-xl-3 p-3 mb-4 rounded-3">
+    <div class="col-12 col-sm-6 col-md-6 col-lg-3 p-3 mb-4 rounded-3">
+      <div class="h-100 p-3 text-dark bg-warning rounded-3">
+        <h3>Reproduction</h3>
+        <ul>
+          <% if @plant["ResproutAbility"] %>
+            <li><strong><%= @plant["ResproutAbility"] == 'Yes' ? 'Can Resprout' : 'Can\'t resprout' %></strong></li>
+          <% end %>
+          <% if @plant["SeedSpreadRate"] %>
+            <li>Seed Spread Rate: <strong><%= @plant["SeedSpreadRate"] %></strong></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-6 col-lg-3 p-3 mb-4 rounded-3">
       <div class="h-100 p-3 text-white bg-success rounded-3">
         <h3>Physical Characteristics</h3>
         <ul>
@@ -98,7 +122,7 @@
         </ul>
       </div>
     </div>
-    <div class="col-12 col-sm-6 col-md-6 col-xl-3 p-3 mb-4 rounded-3">
+    <div class="col-12 col-sm-6 col-md-6 col-lg-3 p-3 mb-4 rounded-3">
       <div class="h-100 p-3 text-white bg-rainbow rounded-3">
         <h3>Colors</h3>
         <% if @plant["FoliageColor"] %>
@@ -112,7 +136,7 @@
         <% end %>
       </div>
     </div>
-    <div class="col-12 col-sm-6 col-md-6 col-xl-3 p-3 mb-4 rounded-3">
+    <div class="col-12 col-sm-6 col-md-6 col-lg-3 p-3 mb-4 rounded-3">
       <div class="h-100 p-3 text-dark bg-light rounded-3">
         <h3>Miscellaneous</h3>
         <% if @plant.states %>
