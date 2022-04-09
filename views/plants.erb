@@ -1,21 +1,25 @@
 <div class="container py-4">
-  <div class="row gy-3">
-    <% @plants.each do |plant| %>
-      <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
-        <a href="/plants/<%= plant["ScientificName"] %>" class="card bg-light h-100">
-          <% if plant.image_src %>
-            <img class="card-img-top" src="<%= plant.image_src %>" alt="Plant Image" />
-          <% end %>
-          <div class="card-body">
-            <%# Color Based on Flower Color %>
-            <h5 class="card-title text-success"><%= plant["CommonName"] %></h5>
-            <h6 class="card-subtitle mb-2 text-muted">
-              <%= plant["ScientificName"] %>
-            </h6>
-            <%= erb :plant_metadata, layout: nil, locals: { :plant => plant } %>
-          </div>
-        </a>
-      </div>
-    <% end %>
-  </div>
+  <% if @plants.length > 0 %>
+    <div class="row gy-3">
+      <% @plants.each do |plant| %>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
+          <a href="/plants/<%= plant["ScientificName"] %>" class="card bg-light h-100">
+            <% if plant.image_src %>
+              <img class="card-img-top" src="<%= plant.image_src %>" alt="Plant Image" />
+            <% end %>
+            <div class="card-body">
+              <%# Color Based on Flower Color %>
+              <h5 class="card-title text-success"><%= plant["CommonName"] %></h5>
+              <h6 class="card-subtitle mb-2 text-muted">
+                <%= plant["ScientificName"] %>
+              </h6>
+              <%= erb :plant_metadata, layout: nil, locals: { :plant => plant } %>
+            </div>
+          </a>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <h1 class="text-muted lead text-center">No plants found.</h1>
+  <% end %>
 </div>
