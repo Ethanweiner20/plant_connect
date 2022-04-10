@@ -36,24 +36,26 @@ end
 
 # SEARCH ALL PLANTS
 
-# Search for plants and render results
-get '/plants' do
-  SEARCH_LIMIT = settings.development? ? 500 : 10000
+def render_plant_list(wrap_layout: false)
+  search_limit = settings.development? ? 500 : 10000
 
+  filters = params.clone
+  filters.delete(:page)
+
+  result = USDAPlants.search(filters, max_index: search_limit)
+  @plants = result[:plants]
+
+  @last_index = result[:last_index]
+
+  erb(:plants, layout: wrap_layout ? :layout : nil)
+end
+
+# Render form or plants list
+get '/plants' do
   if request.xhr? && params.values.all?(&:empty?)
     erb(:alert, layout: nil, locals: { message: "No filters were provided." })
-  elsif request.xhr?
-    @page = params[:page]
-
-    filters = params.clone
-    filters.delete(:page)
-
-    result = USDAPlants.search(filters, max_index: SEARCH_LIMIT)
-    @plants = result[:plants]
-
-    @last_index = result[:last_index]
-
-    erb(:plants, layout: params[:inline] ? :layout : nil)
+  elsif request.xhr? || params[:wrap_layout]
+    render_plant_list(wrap_layout: params[:wrap_layout])
   else
     erb :search
   end
