@@ -1,14 +1,14 @@
 <div class="d-flex align-items-center full-height">
   <div class="p-5 container auth-container bg-light">
     <h1 class="display-6 text-success">Log In</h1>
-    <form action="/login" method="post" class="py-3">
+    <form action="/users" method="get" class="py-3">
       <div class="mb-3">
-        <label for="email">Email Address</label>
-        <input type="email" name="email" id="email" class="form-control" />
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" class="form-control" placeholder="admin" value="<%= @username %>" />
       </div>
       <div class="mb-3">
         <label for="password">Password</label>
-        <input type="password" name="password" id="password" class="form-control" />
+        <input type="password" name="password" id="password" class="form-control" placeholder="Secret1!" />
       </div>
       <button type="submit" class="btn btn-success">Log In</button>
     </form>
