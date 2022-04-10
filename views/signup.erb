@@ -1,0 +1,18 @@
+<div class="d-flex align-items-center full-height">
+  <div class="p-5 container auth-container bg-light">
+    <h1 class="display-6 text-primary">Sign Up</h1>
+    <form action="/signup" method="post" class="py-3">
+      <div class="mb-3">
+        <label for="email">Email Address</label>
+        <input type="email" name="email" id="email" class="form-control" />
+      </div>
+      <div class="mb-3">
+        <label for="password">Password</label>
+        <p class="text-muted sub-info">Must contain at least 10 characters, a number, and uppercase letter</p>
+        <input type="password" name="password" id="password" class="form-control" />
+      </div>
+      <button type="submit" class="btn btn-primary">Sign Up</button>
+    </form>
+    <a href="/login">Already have an account? Log in here.</a>
+  </div>
+</div>

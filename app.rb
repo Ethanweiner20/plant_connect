@@ -21,6 +21,7 @@ end
 # AUTHENTICATION
 
 get '/signup' do
+  erb :signup
 end
 
 post '/users' do
@@ -28,6 +29,7 @@ post '/users' do
 end
 
 get '/login' do
+  erb :login
 end
 
 get '/users' do
