@@ -15,7 +15,7 @@ class PlantConnectTest < MiniTest::Test
   end
 
   def test_plants
-    get '/search'
+    get '/plants'
 
     assert_equal 200, last_response.status
     refute_includes last_response.body, '<div class="card">'

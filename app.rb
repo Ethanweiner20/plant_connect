@@ -15,7 +15,7 @@ end
 # HELPERS
 
 get '/' do
-  redirect '/search'
+  redirect '/plants'
 end
 
 # AUTHENTICATION
@@ -24,30 +24,25 @@ get '/signup' do
 end
 
 post '/users' do
-  redirect '/search'
+  redirect '/plants'
 end
 
 get '/login' do
 end
 
 get '/users' do
-  redirect '/search'
+  redirect '/plants'
 end
 
 # SEARCH ALL PLANTS
 
 # Search for plants and render results
-get '/search' do
-  erb :search
-end
-
-# AJAX route: Display plants
 get '/plants' do
   SEARCH_LIMIT = settings.development? ? 500 : 10000
 
-  if params.values.all?(&:empty?)
+  if request.xhr? && params.values.all?(&:empty?)
     erb(:alert, layout: nil, locals: { message: "No filters were provided." })
-  else
+  elsif request.xhr?
     @page = params[:page]
 
     filters = params.clone
@@ -58,11 +53,9 @@ get '/plants' do
 
     @last_index = result[:last_index]
 
-    if params[:inline]
-      erb(:plants)
-    else
-      erb(:plants, layout: nil)
-    end
+    erb(:plants, layout: params[:inline] ? :layout : nil)
+  else
+    erb :search
   end
 end
 
