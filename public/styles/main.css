@@ -34,3 +34,15 @@ select[multiple] {
   width: 100px;
   height: 150px;
 }
+
+.auth-container {
+  max-width: 500px;
+}
+
+.full-height {
+  height: 80vh;
+}
+
+.sub-info {
+  font-size: 0.8em;
+}

@@ -4,7 +4,9 @@ task :serve do
   sh "bundle exec ruby app.rb"
 end
 
-task :test do
+task test: [:test_app, :test_search]
+
+task :test_app do
   sh "bundle exec ruby test/test_app.rb"
 end
 

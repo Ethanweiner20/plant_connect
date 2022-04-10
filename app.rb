@@ -6,6 +6,7 @@ also_reload('lib/*.rb')
 require 'tilt/erubis'
 require_relative 'lib/plant.rb'
 require_relative 'lib/usda_plants_api.rb'
+require 'yaml'
 
 configure do
   enable :sessions
@@ -14,24 +15,75 @@ end
 
 # HELPERS
 
+ROOT = File.expand_path(__dir__)
+
+def data_path
+  ENV["RACK_ENV"] == "test" ? "#{ROOT}/test/data" : "#{ROOT}/data"
+end
+
+def file_path(file_name)
+  data_path + '/' + file_name
+end
+
 get '/' do
   redirect '/plants'
 end
 
 # AUTHENTICATION
 
-get '/signup' do
+def logout
+  session.delete(:user)
 end
 
-post '/users' do
-  redirect '/plants'
+post '/logout' do
+  logout
+  redirect '/login'
 end
 
 get '/login' do
+  logout
+  erb :login
+end
+
+def valid_login_credentials?(username, password, users)
+  users.key?(username) && users[username] == password
 end
 
 get '/users' do
-  redirect '/plants'
+  username = params[:username]
+  password = params[:password]
+
+  users = YAML.load_file(file_path('users.yml'))
+
+  if valid_login_credentials?(username, password, users)
+    user = users[username]
+    session[:user] = user
+    redirect '/inventory'
+  else
+    session[:error] = "Invalid username or password."
+    @username = username
+    erb :login
+  end
+end
+
+# SIGNUP: Temporarily disabled
+get '/signup' do
+  # Temporary
+  redirect '/login'
+  logout
+  erb :signup
+end
+
+def strong_password?(password)
+  password =~ /.{8,}/ && password =~ /[A-Z]/ && password =~ /[0-9]/
+end
+
+def valid_signup_credentials?(username, password, users)
+  !users.key?(username) && strong_password?(password)
+end
+
+post '/users' do
+  redirect '/inventory'
 end
 
 # SEARCH ALL PLANTS
@@ -87,20 +139,19 @@ end
 
 # Inventories
 
-# Manage inventories
-get '/users/:username/inventories/new' do
-end
-
-post '/users/:username/inventories' do
-end
-
-# Render list of plants in user's inventory
-get '/users/:username/inventories/:inventory_name' do
+# Manage inventory
+get '/inventory' do
   erb :inventory
 end
 
 # Add a plant to a user's inventory
-post '/users/:username/inventories/:inventory_name' do
+post '/inventory' do
+end
+
+# COMMUNITY
+
+get '/community' do
+  erb :community
 end
 
 # SETTINGS
