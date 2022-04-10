@@ -11,7 +11,7 @@ class USDAPlants
 
   # find : String -> Plant
   # Returns a singular plant with the given `scientific_name`
-  def self.find(scientific_name)
+  def self.find_by_name(scientific_name)
     result = search({ "ScientificName" => scientific_name }, limit: 1)
     if result[:plants].length > 0
       result[:plants][0]
@@ -20,9 +20,21 @@ class USDAPlants
     end
   end
 
+  # find_by_id : String -> Plant
+  # Returns a singular plant with the given `id`
+  def self.find_by_id(id)
+    result = search({ "SpeciesID" => id }, limit: 1)
+
+    if result[:plants].length > 0
+      result[:plants][0]
+    else
+      raise "No plant found with id #{id}."
+    end
+  end
+
   # search : Hash of Filters, Integer -> List of Plants
   # Return a list of 10 plants, starting at `start`
-  def self.search(filters, max_index: 500, limit: SEARCH_LIMIT, start: 0)
+  def self.search(filters, max_index: 500, limit: SEARCH_LIMIT)
     filters = filters.reject { |_, value| !value || value.empty? }
     return { plants: [], last_index: 0 } if filters.empty?
 

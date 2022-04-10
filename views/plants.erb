@@ -6,19 +6,26 @@
     <div class="row gy-3">
       <% @plants.each do |plant| %>
         <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
-          <a href="/plants/<%= plant["ScientificName"] %>" class="card bg-light h-100">
-            <% if plant.image_src %>
-              <img class="card-img-top" src="<%= plant.image_src %>" alt="Plant Image" />
+          <div class="card bg-light h-100">
+            <a href="/plants/<%= plant["ScientificName"] %>" >
+              <div class="card-body">
+                <%# Color Based on Flower Color %>
+                <h5 class="card-title text-success"><%= plant["CommonName"] %></h5>
+                <h6 class="card-subtitle mb-2 text-muted">
+                  <%= plant["ScientificName"] %>
+                </h6>
+                <%= erb :plant_metadata, layout: nil, locals: { :plant => plant } %>
+              </div>
+              <% if plant.image_src %>
+                <img class="card-img" src="<%= plant.image_src %>" alt="Plant Image" />
+              <% end %>
+            </a>
+            <% if session.key?(:user) %>
+              <div class="card-footer">
+                <%= erb(:quantity_form, layout: nil, locals: { plant: plant }) %>
+              </div>
             <% end %>
-            <div class="card-body">
-              <%# Color Based on Flower Color %>
-              <h5 class="card-title text-success"><%= plant["CommonName"] %></h5>
-              <h6 class="card-subtitle mb-2 text-muted">
-                <%= plant["ScientificName"] %>
-              </h6>
-              <%= erb :plant_metadata, layout: nil, locals: { :plant => plant } %>
-            </div>
-          </a>
+          </div>
         </div>
       <% end %>
     </div>
