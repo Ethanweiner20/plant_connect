@@ -7,7 +7,7 @@
       <% @plants.each do |plant| %>
         <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
           <div class="card bg-light h-100">
-            <a href="/plants/<%= plant["ScientificName"] %>" >
+            <a href="/plants/<%= plant.id %>" >
               <div class="card-body">
                 <%# Color Based on Flower Color %>
                 <h5 class="card-title text-success"><%= plant["CommonName"] %></h5>

@@ -3,21 +3,34 @@
 <% if plant.is_a? UserPlant %>
   <form class="update-quantity-form" data-plant-id="<%= plant.id %>" action="/inventory/<%= plant.id %>/update" method="post">
     <input type="hidden" name="id" value="<%= plant.id %>" />
-    <div class="row p-0">
-      <div class="col-5 p-1">
+    <div class="row gx-1">
+      <div class="col-5">
         <input class="form-control"
                 type="number" name="quantity"
                 value="<%= plant.quantity %>"
                 id="quantity" required />
       </div>
-      <div class="col-7 p-1">
-        <button class="btn btn-outline-primary" type="submit">
-          Update Amount
-          <div class="spinner-border mx-2" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </button>
+      <div class="col-7">
+        <div class="d-grid">
+          <button class="btn btn-outline-primary" type="submit">
+            New Amount
+            <div class="spinner-border mx-2" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </button>
+        </div>
       </div>
+    </div>
+  </form>
+  <form class="delete-plant-form mt-1" action="/inventory/<%= plant.id %>/delete" method="post">
+    <div class="d-grid">
+      <button type="submit" class="btn btn-outline-danger delete">
+        Delete
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+          <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+        </svg>
+      </button>
     </div>
   </form>
   <%# Add new plant if plant is not yet added %>
@@ -25,13 +38,13 @@
   <form id="<%= plant.id %>" class="add-plant-form" action="/inventory" method="post">
     <input type="hidden" name="id" value="<%= plant.id %>" />
     <div class="row p-0">
-      <div class="col-6 p-1">
+      <div class="col-5 p-1">
         <input class="form-control"
                              type="number" name="quantity"
-                             id="quantity" placeholder="Quantity" required />
+                             id="quantity" placeholder="Amount" required />
       </div>
-      <div class="col-6 p-1">
-        <button class="btn btn-outline-success" type="submit">+ Add
+      <div class="col-7 p-1">
+        <button class="btn btn-outline-success" type="submit">+ Add Plant
           <div class="spinner-border mx-2" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>

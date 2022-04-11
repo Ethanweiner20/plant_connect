@@ -32,7 +32,7 @@ class Plant
 end
 
 class UserPlant < Plant
-  attr_reader :id
+  attr_reader :id, :quantity
 
   def initialize(id, quantity: 0)
     data = USDAPlants.find_by_id(id).data

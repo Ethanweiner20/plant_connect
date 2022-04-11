@@ -26,6 +26,12 @@ def file_path(file_name)
   data_path + '/' + file_name
 end
 
+def search_inventory(id)
+  @user["inventory"]["plants"].find do |plant|
+    plant[:id] == id
+  end
+end
+
 # FILTERS
 
 before do
@@ -125,8 +131,15 @@ end
 
 # VIEW SINGULAR PLANTS
 
-get '/plants/:scientific_name' do
-  @plant = USDAPlants.find_by_name(params[:scientific_name])
+get '/plants/:id' do
+  id = params["id"]
+  plant = search_inventory(id)
+
+  @plant = if plant
+             UserPlant.new(plant[:id], quantity: plant[:quantity])
+           else
+             USDAPlants.find_by_id(id)
+           end
 
   erb :plant
 end
@@ -137,6 +150,12 @@ end
 def render_inventory(filters: nil)
   @plants = @user["inventory"]["plants"].map do |plant|
     UserPlant.new(plant[:id], quantity: plant[:quantity])
+  end
+
+  if filters
+    @plants = @plants.select do |plant|
+      USDAPlants.match?(plant.data, filters)
+    end
   end
 
   erb(:plants, layout: nil)
@@ -180,12 +199,19 @@ end
 post '/inventory/:id/update' do
   quantity = params["quantity"]
   if valid_quantity?(quantity)
-    plant_to_update = @user["inventory"]["plants"].find do |plant|
-      plant[:id] == params["id"]
-    end
+    plant_to_update = search_inventory(params["id"])
     plant_to_update[:quantity] = quantity.to_i
   else
     session[:error] = "Quantity must be a non-negative integer."
+  end
+
+  status 204
+end
+
+# AJAX: Delete plant from inventory
+post '/inventory/:id/delete' do
+  @user["inventory"]["plants"].delete_if do |plant|
+    plant[:id] == params["id"]
   end
 
   status 204
