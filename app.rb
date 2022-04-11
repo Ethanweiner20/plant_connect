@@ -7,6 +7,7 @@ require 'tilt/erubis'
 require_relative 'lib/plant.rb'
 require_relative 'lib/usda_plants_api.rb'
 require 'yaml'
+require 'pry'
 
 configure do
   enable :sessions
@@ -23,6 +24,18 @@ end
 
 def file_path(file_name)
   data_path + '/' + file_name
+end
+
+def search_inventory(id)
+  @user["inventory"]["plants"].find do |plant|
+    plant[:id] == id
+  end
+end
+
+# FILTERS
+
+before do
+  @user = session[:user]
 end
 
 get '/' do
@@ -46,7 +59,7 @@ get '/login' do
 end
 
 def valid_login_credentials?(username, password, users)
-  users.key?(username) && users[username] == password
+  users.key?(username) && users[username]["password"] == password
 end
 
 get '/users' do
@@ -88,37 +101,120 @@ end
 
 # SEARCH ALL PLANTS
 
-def render_plant_list(wrap_layout: false)
+def render_search_results(filters)
   search_limit = settings.development? ? 500 : 10000
-
-  filters = params.clone
-  filters.delete(:page)
 
   result = USDAPlants.search(filters, max_index: search_limit)
   @plants = result[:plants]
 
   @last_index = result[:last_index]
 
-  erb(:plants, layout: wrap_layout ? :layout : nil)
+  erb(:plants, layout: nil)
 end
 
 # Render form or plants list
 get '/plants' do
-  if request.xhr? && params.values.all?(&:empty?)
-    erb(:alert, layout: nil, locals: { message: "No filters were provided." })
-  elsif request.xhr? || params[:wrap_layout]
-    render_plant_list(wrap_layout: params[:wrap_layout])
-  else
+  @title = "Search"
+  @subtitle = "Search for plants using any number of filters."
+
+  if params.empty?
     erb :search
+  elsif params.values.all?(&:empty?)
+    session[:error] = "No filters were provided."
+    erb :search
+  else
+    filters = params.clone
+    filters.delete(:page)
+    erb(:search) + render_search_results(filters)
   end
 end
 
 # VIEW SINGULAR PLANTS
 
-get '/plants/:scientific_name' do
-  @plant = USDAPlants.find(params[:scientific_name])
+get '/plants/:id' do
+  id = params["id"]
+  plant = search_inventory(id)
+
+  @plant = if plant
+             UserPlant.new(plant[:id], quantity: plant[:quantity])
+           else
+             USDAPlants.find_by_id(id)
+           end
 
   erb :plant
+end
+
+# INVENTORY
+
+# Render the inventory using some filters
+def render_inventory(filters: nil)
+  @plants = @user["inventory"]["plants"].map do |plant|
+    UserPlant.new(plant[:id], quantity: plant[:quantity])
+  end
+
+  if filters
+    @plants = @plants.select do |plant|
+      USDAPlants.match?(plant.data, filters)
+    end
+  end
+
+  erb(:plants, layout: nil)
+end
+
+# Manage inventory
+get '/inventory' do
+  redirect '/login' unless session[:user]
+
+  @title = "Inventory"
+  @subtitle = "Browse plants saved in your inventory."
+
+  if params.empty? || params.values.all?(&:empty?)
+    erb(:search) + render_inventory
+  else
+    filters = params.clone
+    filters.delete(:page)
+    erb(:search) + render_inventory(filters: filters)
+  end
+end
+
+def valid_quantity?(quantity)
+  quantity.to_i.to_s == quantity && quantity.to_i >= 0
+end
+
+# AJAX: Add a plant to a user's inventory
+post '/inventory' do
+  quantity = params["quantity"]
+
+  if valid_quantity?(quantity)
+    plant = { id: params["id"], quantity: quantity.to_i }
+    session[:user]["inventory"]["plants"].unshift(plant)
+  else
+    session[:error] = "Quantity must be a non-negative integer."
+  end
+
+  status 204
+end
+
+# AJAX: Update quantity of plant in inventory
+post '/inventory/:id/update' do
+  quantity = params["quantity"]
+  if valid_quantity?(quantity)
+    plant_to_update = search_inventory(params["id"])
+    plant_to_update[:quantity] = quantity.to_i
+  else
+    session[:error] = "Quantity must be a non-negative integer."
+  end
+
+  status 204
+end
+
+# AJAX: Delete plant from inventory
+post '/inventory/:id/delete' do
+  @user["inventory"]["plants"].delete_if do |plant|
+    plant[:id] == params["id"]
+  end
+
+  status 204
 end
 
 # CUSTOM PLANTS
@@ -137,20 +233,10 @@ end
 post '/users/plants/:id' do
 end
 
-# Inventories
-
-# Manage inventory
-get '/inventory' do
-  erb :inventory
-end
-
-# Add a plant to a user's inventory
-post '/inventory' do
-end
-
 # COMMUNITY
 
 get '/community' do
+  redirect '/login' unless session[:user]
   erb :community
 end
 

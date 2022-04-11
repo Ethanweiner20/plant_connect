@@ -1,24 +1,8 @@
 $(document).ready(function () {
   // Plant form submission
   $("form.plant-search").submit(function (event) {
-    event.preventDefault();
     const spinner = $("form.plant-search .spinner-border");
     spinner.css("display", "inline-block");
-    const formData = $(this).serialize();
-
-    // AJAX Request
-    const request = $.get({
-      url: $(this).attr("action"),
-      data: formData,
-    });
-
-    request.done(function (data, textStatus, jqXHR) {
-      spinner.css("display", "none");
-
-      if (jqXHR.status === 200) {
-        $(".plants").html(data);
-      }
-    });
   });
 
   // Filter deletion

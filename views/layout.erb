@@ -61,7 +61,6 @@
               </li>
             </ul>
             <form class="d-flex mb-1" action="/plants">
-              <input type="hidden" name="wrap_layout">
               <input class="form-control me-2" name="CommonName" type="search" placeholder="Plant Name" aria-label="Search" />
               <button class="btn btn-outline-success me-2" type="submit">Search</button>
             </form>
@@ -77,6 +76,14 @@
       <% if session.key?(:error) %>
         <div class="alert alert-danger" role="alert">
           <%= session.delete(:error) %>
+        </div>
+      <% end %>
+      <% if @title %>
+        <div class="py-4 text-center">
+          <p class="h2 text-dark">
+            <%= @title %>
+          </p>
+          <p class="lead mx-4"><%= @subtitle %></p>
         </div>
       <% end %>
       <%= yield %>

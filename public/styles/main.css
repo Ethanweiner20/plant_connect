@@ -1,5 +1,9 @@
-a.card {
+.card a {
   text-decoration: none !important;
+}
+
+.card-footer {
+  margin-top: auto;
 }
 
 .dropdown-menu li {

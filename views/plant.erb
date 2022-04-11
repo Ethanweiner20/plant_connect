@@ -7,7 +7,9 @@
             <h1><%= @plant["CommonName"] %></h1>
             <h2 class="text-muted"><%= @plant["ScientificName"] %></h2>
             <%= erb :plant_metadata, layout: nil, locals: { :plant => @plant } %>
+            <%= erb :quantity_form, layout: nil, locals: { :plant => @plant } %>
           </div>
+          <div class="col-0 col-sm-0 col-md-1 col-lg-2 col-xl-3"></div>
           <% if @plant.image_src %>
             <div class="col-12 col-sm-6 col-md-6 col-lg-5">
               <img class="img-fluid rounded" src="<%= @plant.image_src %>" alt="Image of plant">
