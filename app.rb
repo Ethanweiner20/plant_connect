@@ -7,6 +7,7 @@ require 'tilt/erubis'
 require_relative 'lib/plant.rb'
 require_relative 'lib/usda_plants_api.rb'
 require 'yaml'
+require 'bcrypt'
 require 'pry'
 
 configure do
@@ -38,10 +39,6 @@ def valid_quantity?(quantity)
   quantity.to_i.to_s == quantity && quantity.to_i >= 0
 end
 
-def unique?(id)
-  !search_inventory(id)
-end
-
 def protected!
   return if @user
   session[:error] = "You must be logged in to do that."
@@ -59,9 +56,9 @@ before '/inventory*' do
   protected!
 end
 
-before '/community*' do
-  protected!
-end
+# before '/community*' do
+#   protected!
+# end
 
 get '/' do
   redirect '/plants'
@@ -84,7 +81,8 @@ get '/login' do
 end
 
 def valid_login_credentials?(username, password, users)
-  users.key?(username) && users[username]["password"] == password
+  return false unless users.key?(username)
+  BCrypt::Password.new(users[username]["hash"]) == password
 end
 
 get '/users' do
@@ -105,24 +103,24 @@ get '/users' do
 end
 
 # SIGNUP: Temporarily disabled
-get '/signup' do
-  # Temporary
-  redirect '/login'
-  logout
-  erb :signup
-end
+# get '/signup' do
+#   # Temporary
+#   redirect '/login'
+#   logout
+#   erb :signup
+# end
 
-def strong_password?(password)
-  password =~ /.{8,}/ && password =~ /[A-Z]/ && password =~ /[0-9]/
-end
+# def strong_password?(password)
+#   password =~ /.{8,}/ && password =~ /[A-Z]/ && password =~ /[0-9]/
+# end
 
-def valid_signup_credentials?(username, password, users)
-  !users.key?(username) && strong_password?(password)
-end
+# def valid_signup_credentials?(username, password, users)
+#   !users.key?(username) && strong_password?(password)
+# end
 
-post '/users' do
-  redirect '/inventory'
-end
+# post '/users' do
+#   redirect '/inventory'
+# end
 
 # SEARCH ALL PLANTS
 
@@ -142,9 +140,7 @@ def render_search_results(filters)
   search_limit = settings.development? ? 500 : 10000
 
   result = USDAPlants.search(filters, max_index: search_limit)
-
   @plants = mixin_inventory(result[:plants])
-
   @last_index = result[:last_index]
 
   erb(:plants, layout: nil)
@@ -236,7 +232,7 @@ end
 def verify_in_inventory
   id = params["id"]
 
-  if unique?(id)
+  if !search_inventory(id)
     status 400
     "This plant is not in your inventory."
   else
@@ -247,7 +243,7 @@ end
 def verify_uniqueness
   id = params["id"]
 
-  if unique?(id)
+  if !search_inventory(id)
     yield
   else
     status 400
@@ -277,6 +273,7 @@ end
 
 # AJAX: Delete plant from inventory
 post '/inventory/:id/delete' do
+  # Note: No need to verify id; simply disregards faulty ids
   @inventory["plants"].delete_if do |plant|
     plant[:id] == params["id"]
   end
@@ -287,28 +284,28 @@ end
 # CUSTOM PLANTS
 
 # Add plant to a user's custom plants
-get '/users/plants/new' do
-end
+# get '/users/plants/new' do
+# end
 
-post '/users/plants' do
-end
+# post '/users/plants' do
+# end
 
-# Edit a custom plant
-get '/users/plants/:id/edit' do
-end
+# # Edit a custom plant
+# get '/users/plants/:id/edit' do
+# end
 
-post '/users/plants/:id' do
-end
+# post '/users/plants/:id' do
+# end
 
-# COMMUNITY
+# # COMMUNITY
 
-get '/community' do
-  redirect '/login' unless @user
-  erb :community
-end
+# get '/community' do
+#   redirect '/login' unless @user
+#   erb :community
+# end
 
-# SETTINGS
+# # SETTINGS
 
-get '/settings' do
-  erb :settings
-end
+# get '/settings' do
+#   erb :settings
+# end

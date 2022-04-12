@@ -201,6 +201,13 @@ class PlantConnectTest < MiniTest::Test
     assert_includes session["user"]["inventory"]["plants"], plant
   end
 
+  def test_update_quantity_invalid_plant
+    plant = { id: "5", quantity: 100 }
+    post '/inventory/5/update', plant, @admin_session
+    assert_equal 400, last_response.status
+    assert_includes last_response.body, "This plant is not in your inventory."
+  end
+
   def test_delete_plant
     post '/inventory/4/delete', {}, @admin_session
     assert_equal 204, last_response.status
