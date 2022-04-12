@@ -27,6 +27,7 @@ def file_path(file_name)
 end
 
 def search_inventory(id)
+  return nil unless @user
   @inventory["plants"].find do |plant|
     plant[:id] == id
   end
@@ -169,13 +170,19 @@ end
 
 get '/plants/:id' do
   id = params["id"]
-  plant = search_inventory(id)
 
-  @plant = if plant
-             UserPlant.new(plant[:id], quantity: plant[:quantity])
-           else
-             USDAPlants.find_by_id(id)
-           end
+  begin
+    plant = search_inventory(id)
+
+    @plant = if plant
+               UserPlant.new(plant[:id], quantity: plant[:quantity])
+             else
+               USDAPlants.find_by_id(id)
+             end
+  rescue NoPlantFoundError => e
+    session[:error] = e.message
+    status 400
+  end
 
   erb :plant
 end
@@ -240,7 +247,7 @@ end
 post '/inventory' do
   verify_uniqueness do
     verify_quantity do |quantity|
-      plant = { id: params["id"], quantity: quantity.to_i }
+      plant = { id: params["id"], quantity: quantity }
       @inventory["plants"].unshift(plant)
     end
   end

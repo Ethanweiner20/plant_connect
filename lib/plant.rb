@@ -41,12 +41,4 @@ class UserPlant < Plant
     super(data)
     @quantity = quantity
   end
-
-  def quantity=(new_quantity)
-    @quantity = new_quantity
-    plant_to_update = session[:user]["inventory"]["plants"].find do |plant|
-      plant.id == id
-    end
-    plant_to_update["quantity"] = new_quantity
-  end
 end
