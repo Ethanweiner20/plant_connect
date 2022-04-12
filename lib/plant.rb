@@ -21,6 +21,7 @@ class Plant
 
   def states
     str = self["State"]
+    return nil unless str
     str.index('(') ? str[str.index('(') + 1...str.index(')')] : nil
   end
 
@@ -34,8 +35,8 @@ end
 class UserPlant < Plant
   attr_reader :id, :quantity
 
-  def initialize(id, quantity: 0)
-    data = USDAPlants.find_by_id(id).data
+  def initialize(id, quantity: 0, data: nil)
+    data ||= USDAPlants.find_by_id(id).data
     @id = id
     super(data)
     @quantity = quantity
