@@ -232,6 +232,17 @@ def verify_quantity
   end
 end
 
+def verify_in_inventory
+  id = params["id"]
+
+  if unique?(id)
+    status 400
+    "This plant is not in your inventory."
+  else
+    yield
+  end
+end
+
 def verify_uniqueness
   id = params["id"]
 
@@ -255,9 +266,11 @@ end
 
 # AJAX: Update quantity of plant in inventory
 post '/inventory/:id/update' do
-  verify_quantity do |quantity|
-    plant_to_update = search_inventory(params["id"])
-    plant_to_update[:quantity] = quantity
+  verify_in_inventory do |_quantity|
+    verify_quantity do |quantity|
+      plant_to_update = search_inventory(params["id"])
+      plant_to_update[:quantity] = quantity
+    end
   end
 end
 

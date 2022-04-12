@@ -12,14 +12,18 @@ $(document).ready(function () {
       const data = $(this).serialize();
       const request = $.post(url, data);
 
+      const successMessage = $(this).find(".text-success");
+      const errorMessage = $(this).find(".text-danger");
+
       request.done(() => {
-        $(this).find(".text-success").removeClass("d-none");
+        errorMessage.addClass("d-none");
+        successMessage.removeClass("d-none");
       });
 
       request.fail((data) => {
-        const message = $(this).find(".text-danger");
-        message.removeClass("d-none");
-        message.html(data.responseText);
+        successMessage.addClass("d-none");
+        errorMessage.removeClass("d-none");
+        errorMessage.html(data.responseText);
       });
 
       request.always(() => {
