@@ -56,9 +56,9 @@ before '/inventory*' do
   protected!
 end
 
-# before '/community*' do
-#   protected!
-# end
+before '/community*' do
+  protected!
+end
 
 get '/' do
   redirect '/plants'
@@ -297,15 +297,15 @@ end
 # post '/users/plants/:id' do
 # end
 
-# # COMMUNITY
+# COMMUNITY
 
-# get '/community' do
-#   redirect '/login' unless @user
-#   erb :community
-# end
+get '/community' do
+  redirect '/login' unless @user
+  erb :community
+end
 
-# # SETTINGS
+# SETTINGS
 
-# get '/settings' do
-#   erb :settings
-# end
+get '/settings' do
+  erb :settings
+end
