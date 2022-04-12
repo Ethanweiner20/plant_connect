@@ -27,15 +27,39 @@ def file_path(file_name)
 end
 
 def search_inventory(id)
-  @user["inventory"]["plants"].find do |plant|
+  return nil unless @user
+  @inventory["plants"].find do |plant|
     plant[:id] == id
   end
+end
+
+def valid_quantity?(quantity)
+  quantity.to_i.to_s == quantity && quantity.to_i >= 0
+end
+
+def unique?(id)
+  !search_inventory(id)
+end
+
+def protected!
+  return if @user
+  session[:error] = "You must be logged in to do that."
+  redirect '/login' unless @user
 end
 
 # FILTERS
 
 before do
   @user = session[:user]
+  @inventory = @user ? @user["inventory"] : nil
+end
+
+before '/inventory*' do
+  protected!
+end
+
+before '/community*' do
+  protected!
 end
 
 get '/' do
@@ -101,11 +125,24 @@ end
 
 # SEARCH ALL PLANTS
 
+def mixin_inventory(plants)
+  plants.map do |plant|
+    inventory_plant = search_inventory(plant.id)
+    if inventory_plant
+      UserPlant.new(inventory_plant[:id], quantity: inventory_plant[:quantity],
+                                          data: plant.data)
+    else
+      plant
+    end
+  end
+end
+
 def render_search_results(filters)
   search_limit = settings.development? ? 500 : 10000
 
   result = USDAPlants.search(filters, max_index: search_limit)
-  @plants = result[:plants]
+
+  @plants = mixin_inventory(result[:plants])
 
   @last_index = result[:last_index]
 
@@ -133,13 +170,19 @@ end
 
 get '/plants/:id' do
   id = params["id"]
-  plant = search_inventory(id)
 
-  @plant = if plant
-             UserPlant.new(plant[:id], quantity: plant[:quantity])
-           else
-             USDAPlants.find_by_id(id)
-           end
+  begin
+    plant = search_inventory(id)
+
+    @plant = if plant
+               UserPlant.new(plant[:id], quantity: plant[:quantity])
+             else
+               USDAPlants.find_by_id(id)
+             end
+  rescue NoPlantFoundError => e
+    session[:error] = e.message
+    status 400
+  end
 
   erb :plant
 end
@@ -148,7 +191,7 @@ end
 
 # Render the inventory using some filters
 def render_inventory(filters: nil)
-  @plants = @user["inventory"]["plants"].map do |plant|
+  @plants = @inventory["plants"].map do |plant|
     UserPlant.new(plant[:id], quantity: plant[:quantity])
   end
 
@@ -163,7 +206,7 @@ end
 
 # Manage inventory
 get '/inventory' do
-  redirect '/login' unless session[:user]
+  redirect '/login' unless @user
 
   @title = "Inventory"
   @subtitle = "Browse plants saved in your inventory."
@@ -177,40 +220,63 @@ get '/inventory' do
   end
 end
 
-def valid_quantity?(quantity)
-  quantity.to_i.to_s == quantity && quantity.to_i >= 0
+def verify_quantity
+  quantity = params["quantity"]
+
+  if valid_quantity?(quantity)
+    yield(quantity.to_i)
+    status 204
+  else
+    status 400
+    "Quantity must be a non-negative integer."
+  end
+end
+
+def verify_in_inventory
+  id = params["id"]
+
+  if unique?(id)
+    status 400
+    "This plant is not in your inventory."
+  else
+    yield
+  end
+end
+
+def verify_uniqueness
+  id = params["id"]
+
+  if unique?(id)
+    yield
+  else
+    status 400
+    "This plant is already in your inventory."
+  end
 end
 
 # AJAX: Add a plant to a user's inventory
 post '/inventory' do
-  quantity = params["quantity"]
-
-  if valid_quantity?(quantity)
-    plant = { id: params["id"], quantity: quantity.to_i }
-    session[:user]["inventory"]["plants"].unshift(plant)
-  else
-    session[:error] = "Quantity must be a non-negative integer."
+  verify_uniqueness do
+    verify_quantity do |quantity|
+      plant = { id: params["id"], quantity: quantity }
+      @inventory["plants"].unshift(plant)
+    end
   end
-
-  status 204
 end
 
 # AJAX: Update quantity of plant in inventory
 post '/inventory/:id/update' do
-  quantity = params["quantity"]
-  if valid_quantity?(quantity)
-    plant_to_update = search_inventory(params["id"])
-    plant_to_update[:quantity] = quantity.to_i
-  else
-    session[:error] = "Quantity must be a non-negative integer."
+  verify_in_inventory do |_quantity|
+    verify_quantity do |quantity|
+      plant_to_update = search_inventory(params["id"])
+      plant_to_update[:quantity] = quantity
+    end
   end
-
-  status 204
 end
 
 # AJAX: Delete plant from inventory
 post '/inventory/:id/delete' do
-  @user["inventory"]["plants"].delete_if do |plant|
+  @inventory["plants"].delete_if do |plant|
     plant[:id] == params["id"]
   end
 
@@ -236,7 +302,7 @@ end
 # COMMUNITY
 
 get '/community' do
-  redirect '/login' unless session[:user]
+  redirect '/login' unless @user
   erb :community
 end
 

@@ -2,6 +2,12 @@ require 'csv'
 require 'pry'
 require_relative './plant.rb'
 
+class NoPlantFoundError < StandardError
+  def initialize(msg="No plant found.")
+    super(msg)
+  end
+end
+
 class USDAPlants
   SEARCH_LIMIT = 10
 
@@ -9,16 +15,16 @@ class USDAPlants
 
   NUMERICAL_FILTERS = ["Precipitation_Minimum", "Precipitation_Maximum", "TemperatureMinimum"]
 
-  # find : String -> Plant
+  # find_by_name : String -> Plant
   # Returns a singular plant with the given `scientific_name`
-  def self.find_by_name(scientific_name)
-    result = search({ "ScientificName" => scientific_name }, limit: 1)
-    if result[:plants].length > 0
-      result[:plants][0]
-    else
-      raise "No plant found for #{scientific_name}"
-    end
-  end
+  # def self.find_by_name(scientific_name)
+  #   result = search({ "ScientificName" => scientific_name }, limit: 1)
+  #   if result[:plants].length > 0
+  #     result[:plants][0]
+  #   else
+  #     raise NoPlantFoundError.new, "No plant found for #{scientific_name}"
+  #   end
+  # end
 
   # find_by_id : String -> Plant
   # Returns a singular plant with the given `id`
@@ -28,7 +34,7 @@ class USDAPlants
     if result[:plants].length > 0
       result[:plants][0]
     else
-      raise "No plant found with id #{id}."
+      raise NoPlantFoundError.new, "No plant found with id #{id}."
     end
   end
 

@@ -1,7 +1,3 @@
-require 'minitest/autorun'
-require "minitest/reporters"
-Minitest::Reporters.use!
-
 require_relative '../lib/usda_plants_api.rb'
 
 class USDAPlantsTest < MiniTest::Test
