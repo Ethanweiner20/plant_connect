@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  $(".add-plant-form")
+  $(".quantity-form")
     .unbind("submit")
     .bind("submit", function (event) {
       event.preventDefault();
@@ -13,27 +13,17 @@ $(document).ready(function () {
       const request = $.post(url, data);
 
       request.done(() => {
-        spinner.css("display", "none");
-        $(this).find("button").html("Added!");
+        $(this).find(".text-success").removeClass("d-none");
       });
-    });
 
-  $(".update-quantity-form")
-    .unbind("submit")
-    .bind("submit", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
+      request.fail((data) => {
+        const message = $(this).find(".text-danger");
+        message.removeClass("d-none");
+        message.html(data.responseText);
+      });
 
-      const spinner = $(this).find(".spinner-border");
-      spinner.css("display", "inline-block");
-
-      const url = $(this).attr("action");
-      const data = $(this).serialize();
-      const request = $.post(url, data);
-
-      request.done(() => {
+      request.always(() => {
         spinner.css("display", "none");
-        $(this).find("button").html("Updated!");
       });
     });
 
