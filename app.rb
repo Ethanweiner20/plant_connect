@@ -4,11 +4,7 @@ require 'sinatra/reloader'
 also_reload('lib/*.rb')
 
 require 'tilt/erubis'
-require_relative 'lib/plant.rb'
-require_relative 'lib/usda_plants_api.rb'
-require 'yaml'
-require 'bcrypt'
-require 'pry'
+require_relative 'helpers.rb'
 
 # CONFIGURATION
 
@@ -16,44 +12,6 @@ configure do
   enable :sessions
   set :session_secret, "secret"
   set :erb, escape_html: true
-end
-
-ROOT = File.expand_path(__dir__)
-
-# HELPERS
-
-def data_path
-  ENV["RACK_ENV"] == "test" ? "#{ROOT}/test/data" : "#{ROOT}/data"
-end
-
-def file_path(file_name)
-  data_path + '/' + file_name
-end
-
-def search_inventory(id)
-  return nil unless @user
-  @inventory["plants"].find do |plant|
-    plant[:id] == id
-  end
-end
-
-def protected!
-  return if @user
-  session[:error] = "You must be logged in to do that."
-  redirect '/login' unless @user
-end
-
-# Input Validation
-
-def valid_quantity?(quantity)
-  quantity.to_i.to_s == quantity && quantity.to_i >= 0
-end
-
-def authenticate(username, password)
-  users = YAML.load_file(file_path('users.yml'))
-  return nil unless users.key?(username)
-  user = users[username]
-  return user if BCrypt::Password.new(user["hash"]) == password
 end
 
 # FILTERS
@@ -108,49 +66,7 @@ post '/login' do
   end
 end
 
-# SIGNUP: Temporarily disabled
-# get '/signup' do
-#   # Temporary
-#   redirect '/login'
-#   logout
-#   erb :signup
-# end
-
-# def strong_password?(password)
-#   password =~ /.{8,}/ && password =~ /[A-Z]/ && password =~ /[0-9]/
-# end
-
-# def valid_signup_credentials?(username, password, users)
-#   !users.key?(username) && strong_password?(password)
-# end
-
-# post '/users' do
-#   redirect '/inventory'
-# end
-
 # SEARCH ALL PLANTS
-
-def mixin_inventory(plants)
-  plants.map do |plant|
-    inventory_plant = search_inventory(plant.id)
-    if inventory_plant
-      UserPlant.new(inventory_plant[:id], quantity: inventory_plant[:quantity],
-                                          data: plant.data)
-    else
-      plant
-    end
-  end
-end
-
-def render_search_results(filters)
-  search_limit = settings.development? ? 500 : 10000
-
-  result = USDAPlants.search(filters, max_index: search_limit)
-  @plants = mixin_inventory(result[:plants])
-  @last_index = result[:last_index]
-
-  erb(:'components/plants', layout: nil)
-end
 
 # Render form or plants list
 get '/plants' do
@@ -172,16 +88,8 @@ end
 # VIEW SINGULAR PLANTS
 
 get '/plants/:id' do
-  id = params["id"]
-
   begin
-    plant = search_inventory(id)
-
-    @plant = if plant
-               UserPlant.new(plant[:id], quantity: plant[:quantity])
-             else
-               USDAPlants.find_by_id(id)
-             end
+    @plant = resolve_plant(params["id"])
   rescue NoPlantFoundError => e
     session[:error] = e.message
     status 400
@@ -191,21 +99,6 @@ get '/plants/:id' do
 end
 
 # INVENTORY
-
-# Render the inventory using some filters
-def render_inventory(filters: nil)
-  @plants = @inventory["plants"].map do |plant|
-    UserPlant.new(plant[:id], quantity: plant[:quantity])
-  end
-
-  if filters
-    @plants = @plants.select do |plant|
-      USDAPlants.match?(plant.data, filters)
-    end
-  end
-
-  erb(:'components/plants', layout: nil)
-end
 
 # Manage inventory
 get '/inventory' do
@@ -223,44 +116,10 @@ get '/inventory' do
   end
 end
 
-def verify_quantity
-  quantity = params["quantity"]
-
-  if valid_quantity?(quantity)
-    yield(quantity.to_i)
-    status 204
-  else
-    status 400
-    "Quantity must be a non-negative integer."
-  end
-end
-
-def verify_in_inventory
-  id = params["id"]
-
-  if !search_inventory(id)
-    status 400
-    "This plant is not in your inventory."
-  else
-    yield
-  end
-end
-
-def verify_uniqueness
-  id = params["id"]
-
-  if !search_inventory(id)
-    yield
-  else
-    status 400
-    "This plant is already in your inventory."
-  end
-end
-
 # AJAX: Add a plant to a user's inventory
 post '/inventory' do
-  verify_uniqueness do
-    verify_quantity do |quantity|
+  verify_uniqueness(params["id"]) do
+    verify_quantity(params["quantity"]) do |quantity|
       plant = { id: params["id"], quantity: quantity }
       @inventory["plants"].unshift(plant)
     end
@@ -269,8 +128,8 @@ end
 
 # AJAX: Update quantity of plant in inventory
 post '/inventory/:id/update' do
-  verify_in_inventory do |_quantity|
-    verify_quantity do |quantity|
+  verify_in_inventory(params["id"]) do |_quantity|
+    verify_quantity(params["quantity"]) do |quantity|
       plant_to_update = search_inventory(params["id"])
       plant_to_update[:quantity] = quantity
     end
@@ -285,6 +144,21 @@ post '/inventory/:id/delete' do
   end
 
   status 204
+end
+
+# COMMUNITY
+
+get '/community' do
+  @title = "Community"
+  redirect '/login' unless @user
+  erb :'pages/community'
+end
+
+# SETTINGS
+
+get '/settings' do
+  @title = "Settings"
+  erb :'pages/settings'
 end
 
 # CUSTOM PLANTS
@@ -303,17 +177,23 @@ end
 # post '/users/plants/:id' do
 # end
 
-# COMMUNITY
+# SIGNUP
 
-get '/community' do
-  @title = "Community"
-  redirect '/login' unless @user
-  erb :'pages/community'
-end
+# get '/signup' do
+#   # Temporary
+#   redirect '/login'
+#   logout
+#   erb :signup
+# end
 
-# SETTINGS
+# def strong_password?(password)
+#   password =~ /.{8,}/ && password =~ /[A-Z]/ && password =~ /[0-9]/
+# end
 
-get '/settings' do
-  @title = "Settings"
-  erb :'pages/settings'
-end
+# def valid_signup_credentials?(username, password, users)
+#   !users.key?(username) && strong_password?(password)
+# end
+
+# post '/users' do
+#   redirect '/inventory'
+# end
