@@ -1,5 +1,4 @@
 require 'csv'
-require 'pry'
 require_relative './plant.rb'
 
 class NoPlantFoundError < StandardError

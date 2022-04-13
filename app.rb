@@ -1,7 +1,11 @@
 require 'bundler/setup'
 require 'sinatra'
-require 'sinatra/reloader'
-also_reload('lib/*.rb')
+
+# Reloading
+if development?
+  require 'sinatra/reloader'
+  also_reload('lib/*.rb')
+end
 
 require 'tilt/erubis'
 require_relative 'lib/helpers.rb'
