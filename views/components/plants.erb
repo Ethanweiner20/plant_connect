@@ -14,7 +14,7 @@
                 <h6 class="card-subtitle mb-2 text-muted">
                   <%= plant["ScientificName"] %>
                 </h6>
-                <%== erb :plant_metadata, layout: nil, locals: { :plant => plant } %>
+                <%== erb :'components/plant_metadata', layout: nil, locals: { :plant => plant } %>
               </div>
               <% if plant.image_src %>
                 <img class="card-img" src="<%= plant.image_src %>" alt="Plant Image" />
@@ -22,7 +22,7 @@
             </a>
             <% if session.key?(:user) %>
               <div class="card-footer">
-                <%== erb(:quantity_form, layout: nil, locals: { plant: plant }) %>
+                <%== erb(:'forms/quantity_form', layout: nil, locals: { plant: plant }) %>
               </div>
             <% end %>
           </div>

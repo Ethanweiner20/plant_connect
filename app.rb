@@ -77,7 +77,7 @@ end
 
 get '/login' do
   logout
-  erb :login
+  erb :'pages/login'
 end
 
 def valid_login_credentials?(username, password, users)
@@ -98,7 +98,7 @@ get '/users' do
   else
     session[:error] = "Invalid username or password."
     @username = username
-    erb :login
+    erb :'pages/login'
   end
 end
 
@@ -143,7 +143,7 @@ def render_search_results(filters)
   @plants = mixin_inventory(result[:plants])
   @last_index = result[:last_index]
 
-  erb(:plants, layout: nil)
+  erb(:'components/plants', layout: nil)
 end
 
 # Render form or plants list
@@ -152,14 +152,14 @@ get '/plants' do
   @subtitle = "Search for plants using any number of filters."
 
   if params.empty?
-    erb :search
+    erb :'forms/search'
   elsif params.values.all?(&:empty?)
     session[:error] = "No filters were provided."
-    erb :search
+    erb :'forms/search'
   else
     filters = params.clone
     filters.delete(:page)
-    erb(:search) + render_search_results(filters)
+    erb(:'forms/search') + render_search_results(filters)
   end
 end
 
@@ -181,7 +181,7 @@ get '/plants/:id' do
     status 400
   end
 
-  erb :plant
+  erb :'pages/plant'
 end
 
 # INVENTORY
@@ -198,7 +198,7 @@ def render_inventory(filters: nil)
     end
   end
 
-  erb(:plants, layout: nil)
+  erb(:'components/plants', layout: nil)
 end
 
 # Manage inventory
@@ -209,11 +209,11 @@ get '/inventory' do
   @subtitle = "Browse plants saved in your inventory."
 
   if params.empty? || params.values.all?(&:empty?)
-    erb(:search) + render_inventory
+    erb(:'forms/search') + render_inventory
   else
     filters = params.clone
     filters.delete(:page)
-    erb(:search) + render_inventory(filters: filters)
+    erb(:'forms/search') + render_inventory(filters: filters)
   end
 end
 
@@ -301,11 +301,11 @@ end
 
 get '/community' do
   redirect '/login' unless @user
-  erb :community
+  erb :'pages/community'
 end
 
 # SETTINGS
 
 get '/settings' do
-  erb :settings
+  erb :'pages/settings'
 end
