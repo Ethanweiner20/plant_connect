@@ -10,15 +10,17 @@ require 'yaml'
 require 'bcrypt'
 require 'pry'
 
+# CONFIGURATION
+
 configure do
   enable :sessions
   set :session_secret, "secret"
   set :erb, escape_html: true
 end
 
-# HELPERS
-
 ROOT = File.expand_path(__dir__)
+
+# HELPERS
 
 def data_path
   ENV["RACK_ENV"] == "test" ? "#{ROOT}/test/data" : "#{ROOT}/data"
@@ -35,14 +37,23 @@ def search_inventory(id)
   end
 end
 
-def valid_quantity?(quantity)
-  quantity.to_i.to_s == quantity && quantity.to_i >= 0
-end
-
 def protected!
   return if @user
   session[:error] = "You must be logged in to do that."
   redirect '/login' unless @user
+end
+
+# Input Validation
+
+def valid_quantity?(quantity)
+  quantity.to_i.to_s == quantity && quantity.to_i >= 0
+end
+
+def authenticate(username, password)
+  users = YAML.load_file(file_path('users.yml'))
+  return nil unless users.key?(username)
+  user = users[username]
+  return user if BCrypt::Password.new(user["hash"]) == password
 end
 
 # FILTERS
@@ -59,6 +70,8 @@ PROTECTED_ROUTES.each do |route|
     protected!
   end
 end
+
+# INDEX
 
 get '/' do
   redirect '/plants'
@@ -80,19 +93,12 @@ get '/login' do
   erb :'pages/login'
 end
 
-def valid_login_credentials?(username, password, users)
-  return false unless users.key?(username)
-  BCrypt::Password.new(users[username]["hash"]) == password
-end
-
-get '/users' do
+post '/login' do
   username = params[:username]
   password = params[:password]
 
-  users = YAML.load_file(file_path('users.yml'))
-
-  if valid_login_credentials?(username, password, users)
-    user = users[username]
+  user = authenticate(username, password)
+  if user
     session[:user] = user
     redirect '/inventory'
   else

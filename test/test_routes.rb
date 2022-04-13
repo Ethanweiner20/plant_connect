@@ -75,7 +75,7 @@ class PlantConnectTest < MiniTest::Test
 
   # Successful login: Redirects to page
   def test_successful_login
-    get '/users', { "username" => "admin", "password" => "Secret1!" }
+    post '/login', { "username" => "admin", "password" => "Secret1!" }
 
     assert_equal 302, last_response.status
     get last_response["Location"]
@@ -84,7 +84,7 @@ class PlantConnectTest < MiniTest::Test
   end
 
   def test_failure_login
-    get '/users', { "username" => "admin", "password" => "secret1!" }
+    post '/login', { "username" => "admin", "password" => "secret1!" }
 
     assert_equal 200, last_response.status
     assert_includes last_response.body, "Invalid username or password."
@@ -101,7 +101,7 @@ class PlantConnectTest < MiniTest::Test
 
     get "/logout"
 
-    get '/users', { "username" => "noah", "password" => "Noah12999" }
+    post '/login', { "username" => "noah", "password" => "Noah12999" }
     assert_equal 302, last_response.status
   end
 
