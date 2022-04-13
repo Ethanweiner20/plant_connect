@@ -52,12 +52,12 @@ before do
   @inventory = @user ? @user["inventory"] : nil
 end
 
-before '/inventory*' do
-  protected!
-end
+PROTECTED_ROUTES = ['/inventory*', '/community*', '/settings']
 
-before '/community*' do
-  protected!
+PROTECTED_ROUTES.each do |route|
+  before route do
+    protected!
+  end
 end
 
 get '/' do
@@ -300,6 +300,7 @@ end
 # COMMUNITY
 
 get '/community' do
+  @title = "Community"
   redirect '/login' unless @user
   erb :'pages/community'
 end
@@ -307,5 +308,6 @@ end
 # SETTINGS
 
 get '/settings' do
+  @title = "Settings"
   erb :'pages/settings'
 end
