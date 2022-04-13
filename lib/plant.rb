@@ -32,7 +32,7 @@ class Plant
   end
 end
 
-class UserPlant < Plant
+class InventoryPlant < Plant
   attr_reader :id, :quantity
 
   def initialize(id, quantity: 0, data: nil)

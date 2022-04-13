@@ -1,6 +1,6 @@
 <script src="/scripts/quantity_form.js"></script>
 <%# Update quantity if plant is already added %>
-<% if plant.is_a? UserPlant %>
+<% if plant.is_a? InventoryPlant %>
   <form class="quantity-form" data-plant-id="<%= plant.id %>" action="/inventory/<%= plant.id %>/update" method="post">
     <input type="hidden" name="id" value="<%= plant.id %>" />
     <div class="row gx-1">
