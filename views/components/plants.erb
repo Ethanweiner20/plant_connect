@@ -30,6 +30,13 @@
       <% end %>
     </div>
   <% else %>
-    <h1 class="text-muted lead text-center">No plants found.</h1>
+    <h1 class="text-muted lead text-center mb-3">No plants found.</h1>
+    <% if request.path == '/inventory' %>
+      <a href="/plants">
+        <p class="text-center">
+          Add a new plant here.
+        </p>
+      </a>
+    <% end %>
   <% end %>
 </div>
