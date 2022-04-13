@@ -21,13 +21,13 @@ class ImageSearch
     params[:titles] = titles.join('|')
     uri.query = URI.encode_www_form(params)
     response = Net::HTTP.get_response(uri)
-    if response.is_a?(Net::HTTPSuccess)
-      extract_src(response)
-    end
+    return unless response.is_a?(Net::HTTPSuccess)
+    extract_src(response)
   end
 
   def self.extract_src(response)
     query = JSON.parse(response.body)["query"]
-    return query["pages"].values[0]["imageinfo"][0]["url"] if query && query["pages"]
+    return unless query && query["pages"]
+    query["pages"].values[0]["imageinfo"][0]["url"]
   end
 end

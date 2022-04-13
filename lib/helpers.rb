@@ -1,9 +1,9 @@
-require_relative 'lib/plant.rb'
-require_relative 'lib/usda_plants_api.rb'
+require_relative 'plant.rb'
+require_relative 'usda_plants_api.rb'
 require 'yaml'
 require 'bcrypt'
 
-ROOT = File.expand_path(__dir__)
+ROOT = File.expand_path('..', __dir__)
 
 def data_path
   ENV["RACK_ENV"] == "test" ? "#{ROOT}/test/data" : "#{ROOT}/data"
@@ -14,7 +14,7 @@ def file_path(file_name)
 end
 
 def search_inventory(id)
-  return nil unless @user
+  return unless @user
   @inventory["plants"].find do |plant|
     plant[:id] == id
   end
@@ -34,7 +34,7 @@ end
 
 def authenticate(username, password)
   users = YAML.load_file(file_path('users.yml'))
-  return nil unless users.key?(username)
+  return unless users.key?(username)
   user = users[username]
   return user if BCrypt::Password.new(user["hash"]) == password
 end

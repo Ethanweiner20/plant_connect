@@ -4,7 +4,7 @@ require 'sinatra/reloader'
 also_reload('lib/*.rb')
 
 require 'tilt/erubis'
-require_relative 'helpers.rb'
+require_relative 'lib/helpers.rb'
 
 # CONFIGURATION
 
@@ -116,7 +116,7 @@ get '/inventory' do
   end
 end
 
-# AJAX: Add a plant to a user's inventory
+# [AJAX] Add a plant to a user's inventory
 post '/inventory' do
   verify_uniqueness(params["id"]) do
     verify_quantity(params["quantity"]) do |quantity|
@@ -126,7 +126,7 @@ post '/inventory' do
   end
 end
 
-# AJAX: Update quantity of plant in inventory
+# [AJAX] Update quantity of plant in inventory
 post '/inventory/:id/update' do
   verify_in_inventory(params["id"]) do |_quantity|
     verify_quantity(params["quantity"]) do |quantity|
@@ -136,9 +136,9 @@ post '/inventory/:id/update' do
   end
 end
 
-# AJAX: Delete plant from inventory
+# [AJAX] Delete plant from inventory
+# Note: Simply disregards faulty ids
 post '/inventory/:id/delete' do
-  # Note: No need to verify id; simply disregards faulty ids
   @inventory["plants"].delete_if do |plant|
     plant[:id] == params["id"]
   end

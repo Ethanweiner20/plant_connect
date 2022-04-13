@@ -11,9 +11,12 @@ end
 class USDAPlants
   SEARCH_LIMIT = 10
 
-  CSV_PATH = 'data/plants.csv'
+  PATH = 'data/plants.csv'
+  READ_FORM = "r:ISO-8859-1"
 
-  NUMERICAL_FILTERS = ["Precipitation_Minimum", "Precipitation_Maximum", "TemperatureMinimum"]
+  NUMERICAL_FILTERS = %w(Precipitation_Minimum
+                         Precipitation_Maximum
+                         TemperatureMinimum)
 
   # find_by_name : String -> Plant
   # Returns a singular plant with the given `scientific_name`
@@ -31,11 +34,11 @@ class USDAPlants
   def self.find_by_id(id)
     result = search({ "SpeciesID" => id }, limit: 1)
 
-    if result[:plants].length > 0
-      result[:plants][0]
-    else
+    if result[:plants].empty?
       raise NoPlantFoundError.new, "No plant found with id #{id}."
     end
+
+    result[:plants][0]
   end
 
   # search : Hash of Filters, Integer -> List of Plants
@@ -47,7 +50,7 @@ class USDAPlants
     index = 0
     plants = []
 
-    CSV.foreach(CSV_PATH, "r:ISO-8859-1", headers: true, liberal_parsing: true) do |row|
+    CSV.foreach(PATH, READ_FORM, headers: true, liberal_parsing: true) do |row|
       index += 1
       if match?(row, filters)
         plants << Plant.new(row.to_h)

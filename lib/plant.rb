@@ -7,11 +7,12 @@ class Plant
 
   def initialize(data)
     @data = data
-    @image_src = ImageSearch.find_image_source([data["ScientificName"], data["CommonName"]])
+    @image_src = ImageSearch.find_image_source([data["ScientificName"],
+                                                data["CommonName"]])
   end
 
   def [](key)
-    return nil unless data[key]
+    return unless data[key]
     data[key].empty? || data[key] == '0' ? nil : data[key]
   end
 
@@ -21,14 +22,15 @@ class Plant
 
   def states
     str = self["State"]
-    return nil unless str
-    str.index('(') ? str[str.index('(') + 1...str.index(')')] : nil
+    return unless str&.index('(')
+    str[str.index('(') + 1...str.index(')')]
   end
 
   # Provides a representative color of the plant
   # Used in various display areas
   def colors
-    [self["FlowerColor"], self["FoliageColor"], self["FruitColor"]].compact.reject(&:empty?)
+    [self["FlowerColor"], self["FoliageColor"], self["FruitColor"]]
+      .compact.reject(&:empty?)
   end
 end
 
