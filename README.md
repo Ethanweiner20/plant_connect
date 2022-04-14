@@ -14,7 +14,7 @@ If you want to test out the beta version of PlantConnect:
 
   - `/plants`: Search for different filters
 
-  ### Some Things to Try
+### Some Things to Try
 
 - Search for `Fir` in the `Common Name` filter
 - Search for all plants with a `Yellow` flower color
