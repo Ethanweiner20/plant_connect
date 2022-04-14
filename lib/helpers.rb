@@ -2,8 +2,29 @@ require_relative 'plant.rb'
 require_relative 'usda_plants_api.rb'
 require 'yaml'
 require 'bcrypt'
+require 'bundler/setup'
+require 'sinatra'
 
 ROOT = File.expand_path('..', __dir__)
+
+# VIEW HELPERS
+
+helpers do
+  def generate_attribute_group(group_name, plant)
+    list_items = ATTRIBUTES[group_name].map do |attribute|
+      generate_attribute_item(attribute, plant)
+    end
+    "<ul>#{list_items.join('')}</ul>"
+  end
+
+  def generate_attribute_item(attribute, plant)
+    value = plant[attribute]
+    attribute_name = attribute.split(/(?=[A-Z])/).join(' ')
+    "<li>#{attribute_name}: <strong>#{value}</strong></li>" if value
+  end
+end
+
+# ROUTE HELPERS
 
 def data_path
   ENV["RACK_ENV"] == "test" ? "#{ROOT}/test/data" : "#{ROOT}/data"

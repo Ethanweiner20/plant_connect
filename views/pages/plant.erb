@@ -24,45 +24,13 @@
       <div class="col-12 col-sm-6 col-md-6 col-lg-4 p-3 mb-4 rounded-3">
         <div class="h-100 p-3 text-white bg-dark rounded-3">
           <h3>Taxonomy</h3>
-          <ul>
-            <% if @plant["Class"] %>
-              <li>Class: <strong><%= @plant["Class"] %></strong></li>
-            <% end %>
-            <% if @plant["Order"] %>
-              <li>Order: <strong><%= @plant["Order"] %></strong></li>
-            <% end %>
-            <% if @plant["Family"] %>
-              <li>Family: <strong><%= @plant["Family"] %></strong></li>
-            <% end %>
-            <% if @plant["Genus"] %>
-              <li>Genus: <strong><%= @plant["Genus"] %></strong></li>
-            <% end %>
-            <% if @plant["Species"] %>
-              <li>Species: <strong><%= @plant["Species"] %></strong></li>
-            <% end %>
-          </ul>
+          <%== generate_attribute_group(:taxonomy, @plant) %>
         </div>
       </div>
       <div class="col-12 col-sm-6 col-md-6 col-lg-4 p-3 mb-4 rounded-3">
         <div class="h-100 p-3 text-white bg-info rounded-3">
           <h3>Timing</h3>
-          <ul>
-            <% if @plant["Duration"] %>
-              <li>Duration: <strong><%= @plant["Duration"] %></strong></li>
-            <% end %>
-            <% if @plant["BloomPeriod"] %>
-              <li>Bloom Period: <strong><%= @plant["BloomPeriod"] %></strong></li>
-            <% end %>
-            <% if @plant["ActiveGrowthPeriod"] %>
-              <li>Active Growth Period: <strong><%= @plant["ActiveGrowthPeriod"] %></strong></li>
-            <% end %>
-            <% if @plant["GrowthRate"] %>
-              <li>Growth Rate: <strong><%= @plant["GrowthRate"] %></strong></li>
-            <% end %>
-            <% if @plant["Lifespan"] %>
-              <li>Lifespan: <strong><%= @plant["Lifespan"] %></strong></li>
-            <% end %>
-          </ul>
+          <%== generate_attribute_group(:timing, @plant) %>
         </div>
       </div>
       <div class="col-12 col-sm-6 col-md-6 col-lg-4 p-3 mb-4 rounded-3">
@@ -79,64 +47,25 @@
           <% if @plant["TemperatureMinimum"] %>
             <li>Minimum Temperature: <strong><%= @plant["TemperatureMinimum"] %>&deg;F</strong></li>
           <% end %>
-          <% if @plant["DroughtTolerance"] %>
-            <li>Drought Tolerance: <strong><%= @plant["DroughtTolerance"] %></strong></li>
-          <% end %>
-          <% if @plant["ShadeTolerance"] %>
-            <li>Shade Tolerance: <strong><%= @plant["ShadeTolerance"] %></strong></li>
-          <% end %>
-          <% if @plant["FireResistance"] %>
-            <li>Fire Resistance: <strong><%= @plant["FireResistance"] %></strong></li>
-          <% end %>
-          <% if @plant["FertilityRequirement"] %>
-            <li>Fertility Requirement: <strong><%= @plant["FertilityRequirement"] %></strong></li>
-          <% end %>
+          <%== generate_attribute_group(:growth_requirements, @plant) %>
         </div>
       </div>
       <div class="col-12 col-sm-6 col-md-6 col-lg-3 p-3 mb-4 rounded-3">
         <div class="h-100 p-3 text-dark bg-warning rounded-3">
           <h3>Reproduction</h3>
-          <ul>
-            <% if @plant["ResproutAbility"] %>
-              <li><strong><%= @plant["ResproutAbility"] == 'Yes' ? 'Can Resprout' : 'Can\'t resprout' %></strong></li>
-            <% end %>
-            <% if @plant["SeedSpreadRate"] %>
-              <li>Seed Spread Rate: <strong><%= @plant["SeedSpreadRate"] %></strong></li>
-            <% end %>
-          </ul>
+          <%== generate_attribute_group(:reproduction, @plant) %>
         </div>
       </div>
       <div class="col-12 col-sm-6 col-md-6 col-lg-3 p-3 mb-4 rounded-3">
         <div class="h-100 p-3 text-white bg-success rounded-3">
           <h3>Physical Characteristics</h3>
-          <ul>
-            <% if @plant["MatureHeight"] %>
-              <li>Mature Height: <strong><%= @plant["MatureHeight"] %></strong></li>
-            <% end %>
-            <% if @plant["GrowthHabit"] %>
-              <li>Growth Habit: <strong><%= @plant["GrowthHabit"] %></strong></li>
-            <% end %>
-            <% if @plant["GrowthForm"] %>
-              <li>Growth Form: <strong><%= @plant["GrowthForm"] %></strong></li>
-            <% end %>
-            <% if @plant["FoliageTexture"] %>
-              <li>Foliage Texture: <strong><%= @plant["FoliageTexture"] %></strong></li>
-            <% end %>
-          </ul>
+          <%== generate_attribute_group(:physical_characteristics, @plant) %>
         </div>
       </div>
       <div class="col-12 col-sm-6 col-md-6 col-lg-3 p-3 mb-4 rounded-3">
         <div class="h-100 p-3 text-white bg-rainbow rounded-3">
           <h3>Colors</h3>
-          <% if @plant["FoliageColor"] %>
-            <li>Foliage: <strong><%= @plant["FoliageColor"] %></strong></li>
-          <% end %>
-          <% if @plant["FlowerColor"] %>
-            <li>Flower: <strong><%= @plant["FlowerColor"] %></strong></li>
-          <% end %>
-          <% if @plant["FruitColor"] %>
-            <li>Fruit: <strong><%= @plant["FruitColor"] %></strong></li>
-          <% end %>
+          <%== generate_attribute_group(:colors, @plant) %>
         </div>
       </div>
       <div class="col-12 col-sm-6 col-md-6 col-lg-3 p-3 mb-4 rounded-3">

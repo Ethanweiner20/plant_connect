@@ -202,10 +202,3 @@
   <hr />
 </div>
 </form>
-<div class="plants">
-  <% if session.key?(:search_error) %>
-    <div class="alert alert-danger" role="alert">
-      <%= session.delete(:search_error) %>
-    </div>
-  <% end %>
-</div>

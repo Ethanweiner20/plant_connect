@@ -18,6 +18,19 @@ configure do
   set :erb, escape_html: true
 end
 
+# CONSTANTS
+
+ATTRIBUTES = {
+  taxonomy: %w(Class Order Family Genus Species),
+  timing: %w(Duration BloomPeriod ActiveGrowthPeriod GrowthRate Lifespan),
+  growth_requirements: %w(DroughtTolerance ShadeTolerance FireRestistance
+                       FertilityRequirement),
+  reproduction: %w(ResproutAbility SeedSpreadRate),
+  physical_characteristics: %w(MatureHeight GrowthHabit GrowthForm
+                            FoliageTexture),
+  colors: %w(FoliageColor FlowerColor FruitColor)
+}
+
 # FILTERS
 
 before do
