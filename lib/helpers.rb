@@ -1,5 +1,5 @@
-require_relative 'plant.rb'
-require_relative 'usda_plants_api.rb'
+require_relative 'plant'
+require_relative 'usda_plants_api'
 require 'yaml'
 require 'bcrypt'
 require 'bundler/setup'
@@ -31,7 +31,7 @@ def data_path
 end
 
 def file_path(file_name)
-  data_path + '/' + file_name
+  "#{data_path}/#{file_name}"
 end
 
 def search_inventory(id)
@@ -53,7 +53,7 @@ def valid_quantity?(quantity)
   quantity.to_i.to_s == quantity && quantity.to_i >= 0
 end
 
-def authenticate(username, password)
+def find_user(username, password)
   users = YAML.load_file(file_path('users.yml'))
   return unless users.key?(username)
   user = users[username]

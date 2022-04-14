@@ -8,7 +8,7 @@ if development?
 end
 
 require 'tilt/erubis'
-require_relative 'lib/helpers.rb'
+require_relative 'lib/helpers'
 
 # CONFIGURATION
 
@@ -24,10 +24,10 @@ ATTRIBUTES = {
   taxonomy: %w(Class Order Family Genus Species),
   timing: %w(Duration BloomPeriod ActiveGrowthPeriod GrowthRate Lifespan),
   growth_requirements: %w(DroughtTolerance ShadeTolerance FireRestistance
-                       FertilityRequirement),
+                          FertilityRequirement),
   reproduction: %w(ResproutAbility SeedSpreadRate),
   physical_characteristics: %w(MatureHeight GrowthHabit GrowthForm
-                            FoliageTexture),
+                               FoliageTexture),
   colors: %w(FoliageColor FlowerColor FruitColor)
 }
 
@@ -72,7 +72,7 @@ post '/login' do
   username = params[:username]
   password = params[:password]
 
-  user = authenticate(username, password)
+  user = find_user(username, password)
   if user
     session[:user] = user
     redirect '/inventory'

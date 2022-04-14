@@ -6,7 +6,7 @@ require "minitest/reporters"
 Minitest::Reporters.use!
 
 require "rack/test"
-require_relative '../app.rb'
+require_relative '../app'
 
 class PlantConnectTest < MiniTest::Test
   include Rack::Test::Methods
@@ -110,7 +110,8 @@ class PlantConnectTest < MiniTest::Test
     post '/users', { "username" => "noah", "password" => "Noah" }
 
     assert_equal 200, last_response.status
-    assert_includes last_response.body, "Password must contain at least 8 characters, a number, and uppercase letter."
+    assert_includes last_response.body, "Password must contain at least 8
+      characters, a number, and uppercase letter."
   end
 
   def test_username_taken_signup

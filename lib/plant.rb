@@ -1,6 +1,6 @@
 # Stores the data for a given plant
-require_relative 'image_search.rb'
-require_relative 'usda_plants_api.rb'
+require_relative 'image_search'
+require_relative 'usda_plants_api'
 
 class Plant
   attr_reader :data, :image_src

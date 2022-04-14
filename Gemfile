@@ -11,6 +11,7 @@ gem 'simplecov', require: false, group: :test
 gem "sinatra"
 gem "sinatra-contrib"
 gem "webrick"
+gem "rubocop", '0.86.0'
 
 group :production do
   gem "puma"

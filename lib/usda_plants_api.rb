@@ -1,5 +1,5 @@
 require 'csv'
-require_relative './plant.rb'
+require_relative './plant'
 
 class NoPlantFoundError < StandardError
   def initialize(msg="No plant found.")
@@ -42,6 +42,7 @@ class USDAPlants
 
   # search : Hash of Filters, Integer -> List of Plants
   # Return a list of 10 plants, starting at `start`
+  # rubocop:disable Metrics/MethodLength
   def self.search(filters, max_index: 500, limit: SEARCH_LIMIT)
     filters = filters.reject { |_, value| !value || value.empty? }
     return { plants: [], last_index: 0 } if filters.empty?
@@ -62,6 +63,7 @@ class USDAPlants
 
     { plants: plants, last_index: index }
   end
+  # rubocop:enable Metrics/MethodLength
 
   def self.match?(row, filters)
     filters.all? do |key, value|

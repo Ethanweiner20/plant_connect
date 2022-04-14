@@ -1,8 +1,9 @@
-require_relative '../lib/usda_plants_api.rb'
+require_relative '../lib/usda_plants_api'
 
 class USDAPlantsTest < MiniTest::Test
   TEMPORARY_SEARCH_LIMIT = 500
 
+  # rubocop:disable Metrics/LineLength
   def test_common_name
     assert_equal 1, USDAPlants.search({ "CommonName" => "Arizona boxelder" }, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
     assert_equal 1, USDAPlants.search({ "CommonName" => "Arizona boxe" }, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
@@ -92,4 +93,5 @@ class USDAPlantsTest < MiniTest::Test
   end
 
   def test_offset; end
+  # rubocop:enable Metrics/LineLength
 end
