@@ -1,10 +1,10 @@
-# PlantConnect
+# BloomShare
 
-Please read this README. It contains important information about how to test PlantConnect during its beta phase.
+Please read this README. It contains important information about how to test BloomShare during its beta phase.
 
 ## Beta Experimentation
 
-If you want to test out the beta version of PlantConnect:
+If you want to test out the beta version of BloomShare:
 
 - Visit https://plant-connect.herokuapp.com
 - To login: Press `Log In` button or visit `/login`

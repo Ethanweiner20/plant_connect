@@ -8,7 +8,7 @@ Minitest::Reporters.use!
 require "rack/test"
 require_relative '../app'
 
-class PlantConnectTest < MiniTest::Test
+class BloomShareTest < MiniTest::Test
   include Rack::Test::Methods
 
   def app
