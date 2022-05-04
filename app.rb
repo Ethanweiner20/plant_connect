@@ -1,12 +1,5 @@
 require 'bundler/setup'
 require 'sinatra'
-
-# Reloading
-if development?
-  require 'sinatra/reloader'
-  also_reload('lib/*.rb')
-end
-
 require 'tilt/erubis'
 require_relative 'lib/helpers'
 
@@ -16,6 +9,11 @@ configure do
   enable :sessions
   set :session_secret, "secret"
   set :erb, escape_html: true
+end
+
+configure(:development) do
+  require 'sinatra/reloader'
+  also_reload('lib/*.rb')
 end
 
 # CONSTANTS
