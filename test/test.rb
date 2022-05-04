@@ -10,4 +10,4 @@ Minitest::Reporters.use!
 require "rack/test"
 require_relative './test_routes'
 require_relative './test_image_search'
-require_relative './test_usda_plants_api'
+require_relative './test_plants_api'

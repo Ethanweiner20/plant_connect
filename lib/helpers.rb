@@ -104,7 +104,7 @@ def mix_in_inventory(plants)
 end
 
 def render_search_results(filters)
-  result = USDAPlants.search(filters)
+  result = @plants.search(filters)
   @plants = mix_in_inventory(result[:plants])
   @last_index = result[:last_index]
 
@@ -117,7 +117,7 @@ def resolve_plant(id)
   if plant
     InventoryPlant.new(plant[:id], quantity: plant[:quantity])
   else
-    USDAPlants.find_by_id(id)
+    @plants.find_by_id(id)
   end
 end
 
@@ -129,7 +129,7 @@ def render_inventory(filters: nil)
 
   if filters
     @plants = @plants.select do |plant|
-      USDAPlants.match?(plant.data, filters)
+      @plants.match?(plant.data, filters)
     end
   end
 

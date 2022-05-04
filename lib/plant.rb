@@ -38,7 +38,7 @@ class InventoryPlant < Plant
   attr_reader :id, :quantity
 
   def initialize(id, quantity: 0, data: nil)
-    data ||= USDAPlants.find_by_id(id).data
+    data ||= @plants.find_by_id(id).data
     @id = id
     super(data)
     @quantity = quantity
