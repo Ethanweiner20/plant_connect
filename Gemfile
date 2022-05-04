@@ -12,6 +12,7 @@ gem "sinatra"
 gem "sinatra-contrib"
 gem "webrick"
 gem "rubocop", '0.86.0'
+gem "pg"
 
 group :production do
   gem "puma"
