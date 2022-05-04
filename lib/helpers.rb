@@ -1,5 +1,5 @@
 require_relative 'plant'
-require_relative 'usda_plants_api'
+require_relative 'plants_storage'
 require 'yaml'
 require 'bcrypt'
 require 'bundler/setup'
@@ -95,6 +95,7 @@ def mix_in_inventory(plants)
     inventory_plant = search_inventory(plant.id)
     if inventory_plant
       InventoryPlant.new(inventory_plant[:id],
+                         @plants_storage,
                          quantity: inventory_plant[:quantity],
                          data: plant.data)
     else
@@ -104,8 +105,8 @@ def mix_in_inventory(plants)
 end
 
 def render_search_results(filters)
-  result = @plants.search(filters)
-  @plants = mix_in_inventory(result[:plants])
+  result = @plants_storage.search(filters)
+  @plants_storage = mix_in_inventory(result[:plants])
   @last_index = result[:last_index]
 
   erb(:'components/plants', layout: nil)
@@ -115,21 +116,21 @@ def resolve_plant(id)
   plant = search_inventory(id)
 
   if plant
-    InventoryPlant.new(plant[:id], quantity: plant[:quantity])
+    InventoryPlant.new(plant[:id], @plants_storage, quantity: plant[:quantity])
   else
-    @plants.find_by_id(id)
+    @plants_storage.find_by_id(id)
   end
 end
 
 # Render the plants from the inventory using optional `filters`
 def render_inventory(filters: nil)
-  @plants = @inventory["plants"].map do |plant|
-    InventoryPlant.new(plant[:id], quantity: plant[:quantity])
+  @plants_storage = @inventory["plants"].map do |plant|
+    InventoryPlant.new(plant[:id], @plants_storage, quantity: plant[:quantity])
   end
 
   if filters
-    @plants = @plants.select do |plant|
-      @plants.match?(plant.data, filters)
+    @plants_storage = @plants_storage.select do |plant|
+      @plants_storage.match?(plant.data, filters)
     end
   end
 

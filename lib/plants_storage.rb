@@ -21,7 +21,7 @@ class NoPlantFoundError < StandardError
   end
 end
 
-class Plants
+class PlantsStorage
   SEARCH_LIMIT = 10
 
   READ_FORM = "r:ISO-8859-1"

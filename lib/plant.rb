@@ -1,6 +1,6 @@
 # Stores the data for a given plant
 require_relative 'image_search'
-require_relative 'usda_plants_api'
+require_relative 'plants_storage'
 
 class Plant
   attr_reader :data, :image_src
@@ -37,8 +37,8 @@ end
 class InventoryPlant < Plant
   attr_reader :id, :quantity
 
-  def initialize(id, quantity: 0, data: nil)
-    data ||= @plants.find_by_id(id).data
+  def initialize(id, plants_storage, quantity: 0, data: nil)
+    data ||= plants_storage.find_by_id(id).data
     @id = id
     super(data)
     @quantity = quantity

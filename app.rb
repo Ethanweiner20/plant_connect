@@ -2,7 +2,7 @@ require 'bundler/setup'
 require 'sinatra'
 require 'tilt/erubis'
 require_relative 'lib/helpers'
-require_relative 'lib/plants'
+require_relative 'lib/plants_storage'
 
 # CONFIGURATION
 
@@ -37,7 +37,7 @@ before do
   @inventory = @user ? @user["inventory"] : nil
 
   # Load user first, plant storage second
-  @plants = Plants.new(logger: logger)
+  @plants_storage = PlantsStorage.new(logger: logger)
 end
 
 PROTECTED_ROUTES = ['/inventory*', '/community*', '/settings']
