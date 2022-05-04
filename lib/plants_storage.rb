@@ -12,6 +12,7 @@ Note: Uses the `Plant` class for plant creation
 
 =end
 
+require 'pg'
 require 'csv'
 require_relative './plant'
 
@@ -22,15 +23,16 @@ class NoPlantFoundError < StandardError
 end
 
 class PlantsStorage
-  SEARCH_LIMIT = 10
+  PAGE_LIMIT = 20
 
   READ_FORM = "r:ISO-8859-1"
 
-  NUMERICAL_FILTERS = %w(Precipitation_Minimum
-                         Precipitation_Maximum
-                         TemperatureMinimum)
+  NUMERICAL_FILTERS = %w(precipitation_minimum
+                         precipitation_maximum
+                         temperature_minimum)
 
   def initialize(logger: nil, user_id: nil)
+    @db = PG.connect(dbname: 'plants') # Configure for production
     @csv_path = 'data/plants.csv'
     @logger = logger
     @user_id = user_id
@@ -49,27 +51,27 @@ class PlantsStorage
   end
 
   # search : Hash of Filters, Integer -> List of Plants
-  # Returns a list of `SEARCH_LIMIT` plants starting at a given offset
+  # Returns a list of `PAGE_LIMIT` plants starting at a given offset
   # Only includes public plants or plants created by the current user
   # rubocop:disable Metrics/MethodLength
-  def search(filters, max_index: 500, limit: SEARCH_LIMIT)
+  def search(filters, max_index: 500, limit: PAGE_LIMIT)
     # Note: Add functionality to include user-specific plants to result
     filters = filters.reject { |_, value| !value || value.empty? }
     return { plants: [], last_index: 0 } if filters.empty?
 
-    index = 0
-    plants = []
+    # index = 0
+    # plants = []
 
-    CSV.foreach(@csv_path, READ_FORM, headers: true, liberal_parsing: true) do |row|
-      index += 1
-      if match?(row, filters)
-        plants << Plant.new(row.to_h)
-        break if plants.size == limit
-      end
+    # CSV.foreach(@csv_path, READ_FORM, headers: true, liberal_parsing: true) do |row|
+    #   index += 1
+    #   if match?(row, filters)
+    #     plants << Plant.new(row.to_h)
+    #     break if plants.size == limit
+    #   end
 
-      # TEMPORARY
-      break if index >= max_index
-    end
+    #   # TEMPORARY
+    #   break if index >= max_index
+    # end
 
     { plants: plants, last_index: index }
   end
