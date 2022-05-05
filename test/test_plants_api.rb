@@ -74,6 +74,12 @@ class PlantsTest < MiniTest::Test
     assert_equal "alder", @plants_storage.search(filters)[0]["common_name"]
   end
 
-  def test_offset; end
+  def test_pagination
+    filters = { "genus" => "Acer" }
+    assert_equal PlantsStorage::PAGE_LIMIT, @plants_storage.search(filters, page: 2).size
+
+    filters = { "genus" => "Acer" }
+    assert_equal 0, @plants_storage.search(filters, page: 3).size
+  end
   # rubocop:enable Metrics/LineLength
 end

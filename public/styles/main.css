@@ -2,6 +2,11 @@
   text-decoration: none !important;
 }
 
+img.card-img {
+  height: 200px;
+  object-fit: cover;
+}
+
 .card-footer {
   margin-top: auto;
 }

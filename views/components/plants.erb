@@ -1,12 +1,12 @@
 <div class="container py-3">
+  <div class="row gy-3">
+    <%== erb :'components/pagination', layout: nil, locals: { :page => @page } %>
+  </div>
   <% if @plants_storage.length > 0 %>
-    <div class="row">
-      <p class="text-muted">Only the first <%= @plants_storage.length %> plants matching the filters are shown.</p>
-    </div>
     <div class="row gy-3">
       <% @plants_storage.each do |plant| %>
         <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
-          <div class="card bg-light">
+          <div class="card bg-light h-100">
             <a href="/plants/<%= plant.id %>" >
               <div class="card-body">
                 <%# Color Based on Flower Color %>
@@ -29,6 +29,11 @@
         </div>
       <% end %>
     </div>
+    <% if @plants_storage.length >= 4 %>
+      <div class="my-3">
+        <%== erb :'components/pagination', layout: nil, locals: { :page => @page } %>
+      </div>
+    <% end %>
   <% else %>
     <h1 class="text-muted lead text-center mb-3">No plants found.</h1>
     <% if request.path == '/inventory' %>

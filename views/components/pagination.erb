@@ -1,0 +1,15 @@
+<nav aria-label="Pagination">
+  <ul class="pagination">
+    <li class="page-item <%= @page == 1 ? 'disabled': '' %>">
+      <a class="page-link" href="<%= link_to_page(@page - 1) %>">Previous</a>
+    </li>
+    <% @pagination_pages.each do |page_number| %>
+      <li class="page-item <%= @page == page_number ? 'active' : '' %>">
+        <a class="page-link" href="<%= link_to_page(page_number) %>">
+          <%= page_number %>
+        </a>
+      </li>
+    <% end %>
+    <li class="page-item"><a class="page-link" href="<%= link_to_page(@page + 1) %>">Next</a></li>
+  </ul>
+</nav>

@@ -3,6 +3,7 @@ require 'sinatra'
 require 'tilt/erubis'
 require_relative 'lib/helpers'
 require_relative 'lib/plants_storage'
+require 'pry'
 
 # CONFIGURATION
 
@@ -92,15 +93,21 @@ get '/plants' do
   @title = "Search"
   @subtitle = "Search for plants using any number of filters."
 
+  filters = params.clone
+  filters.delete(:page)
+
   if params.empty?
     erb :'forms/search'
-  elsif params.values.all?(&:empty?)
+  elsif !params.key?(:page)
+    session[:error] = "No page was provided."
+    erb :'forms/search'
+  elsif filters.values.all?(&:empty?)
     session[:error] = "No filters were provided."
     erb :'forms/search'
   else
-    filters = params.clone
-    filters.delete(:page)
-    erb(:'forms/search') + render_search_results(filters)
+    @page = set_page_number
+    @pagination_pages = pagination_pages(@page)
+    erb(:'forms/search') + render_search_results(filters, page: @page)
   end
 end
 
@@ -125,13 +132,15 @@ get '/inventory' do
 
   @title = "Inventory"
   @subtitle = "Browse plants saved in your inventory."
+  @page = set_page_number
+  @pagination_pages = pagination_pages(@page)
 
   if params.empty? || params.values.all?(&:empty?)
     erb(:'forms/search') + render_inventory
   else
     filters = params.clone
     filters.delete(:page)
-    erb(:'forms/search') + render_inventory(filters: filters)
+    erb(:'forms/search') + render_inventory(filters: filters, page: @page)
   end
 end
 

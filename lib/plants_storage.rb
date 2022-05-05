@@ -8,7 +8,7 @@ class NoPlantFoundError < StandardError
 end
 
 class PlantsStorage
-  PAGE_LIMIT = 10
+  PAGE_LIMIT = 6
 
   NUMERICAL_FILTERS = %w(precipitation_minimum
                          precipitation_maximum
@@ -29,7 +29,7 @@ class PlantsStorage
   # Returns a list of `PAGE_LIMIT` plants starting at a given offset
   # Only includes public plants or plants created by the current user
   # rubocop:disable Metrics/MethodLength
-  def search(filters, limit: PAGE_LIMIT)
+  def search(filters, limit: PAGE_LIMIT, page: 1)
     # Note: Add functionality to include user-specific plants to result
     filters = filters.reject do |_, value|
       !value || value.empty?
@@ -39,22 +39,37 @@ class PlantsStorage
 
     # We must create a string that interpolates all filters
     conditions_string, condition_params = filters_to_conditions(filters)
+    offset = compute_offset(page)
 
     sql = <<~SQL
           SELECT * FROM plants
             WHERE #{conditions_string} AND is_public = true
           ORDER BY scientific_name
-          LIMIT $1;
+          LIMIT $1
+          OFFSET $2;
           SQL
 
-    result = query(sql, [limit] + condition_params)
+    result = query(sql, [limit, offset] + condition_params)
     result.map { |tuple| Plant.new(tuple) }
   end
   # rubocop:enable Metrics/MethodLength
 
+  # find_by_id : String -> Plant
+  # Returns a singular plant with the given `id`
+  def find_by_id(id)
+    result = search({ "id" => id }, limit: 1)
+
+    if result.empty?
+      raise NoPlantFoundError.new, "No plant found with id #{id}."
+    end
+
+    result[0]
+  end
+
+  private
   # Retrieves a conditions string & associated parameters for that string
   # Just use a manual approach
-  def filters_to_conditions(filters, first_placeholder: 2)
+  def filters_to_conditions(filters, first_placeholder: 3)
     conditions = []
     condition_params = []
     n = first_placeholder
@@ -88,23 +103,15 @@ class PlantsStorage
     [conditions.join(' AND '), condition_params]
   end
 
-  # find_by_id : String -> Plant
-  # Returns a singular plant with the given `id`
-  def find_by_id(id)
-    result = search({ "id" => id }, limit: 1)
-
-    if result.empty?
-      raise NoPlantFoundError.new, "No plant found with id #{id}."
-    end
-
-    result[0]
-  end
-
   def filters_to_conditions_string(filters)
     conditions = filters.map do |key, value|
       filter_to_condition(key, value)
     end
 
     conditions.join(' AND ')
+  end
+
+  def compute_offset(page_number)
+    (page_number - 1) * PAGE_LIMIT
   end
 end

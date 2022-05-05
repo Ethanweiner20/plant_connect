@@ -88,6 +88,34 @@ def verify_uniqueness(id)
   end
 end
 
+# Pagination helpers
+
+def set_page_number
+  if valid_page?(params[:page])
+    params[:page].to_i
+  else
+    session[:error] = "Invalid page number '#{params[:page]}'. "\
+                      "Showing page 1 instead."
+    1
+  end
+end
+
+def pagination_pages(current_page_number, num_pages: 4)
+  multiplier = (current_page_number - 1) / num_pages
+  start = (multiplier * num_pages) + 1
+  (start...start + num_pages).to_a
+end
+
+def valid_page?(page_string)
+  page_number = page_string.to_i
+  page_number.to_s == page_string && page_number >= 1
+end
+
+def link_to_page(page_number)
+  current_path = request.fullpath
+  current_path.gsub(/page=\d+/, "page=#{page_number}")
+end
+
 # Search helpers
 
 def mix_in_inventory(plants)
@@ -104,8 +132,8 @@ def mix_in_inventory(plants)
   end
 end
 
-def render_search_results(filters)
-  result = @plants_storage.search(filters)
+def render_search_results(filters, page: 1)
+  result = @plants_storage.search(filters, page: page)
   @plants_storage = mix_in_inventory(result)
 
   erb(:'components/plants', layout: nil)
@@ -122,7 +150,7 @@ def resolve_plant(id)
 end
 
 # Render the plants from the inventory using optional `filters`
-def render_inventory(filters: nil)
+def render_inventory(filters: nil, page: 1)
   @plants_storage = @inventory["plants"].map do |plant|
     InventoryPlant.new(plant[:id], @plants_storage, quantity: plant[:quantity])
   end
