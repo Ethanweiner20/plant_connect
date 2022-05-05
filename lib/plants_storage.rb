@@ -1,21 +1,5 @@
-=begin
-
-Wishlist:
-
-- Plants#initialize(logger, user_id)
-  - Connect to plant database
-  - Setup the logger
-  - Store the current `user_id` for use in searches
-- Plants#search: Returns all public plants + all plants created by given user
-
-Note: Uses the `Plant` class for plant creation
-
-=end
-
 require 'pg'
-require 'csv'
 require_relative './plant'
-require 'pry'
 
 class NoPlantFoundError < StandardError
   def initialize(msg="No plant found.")
