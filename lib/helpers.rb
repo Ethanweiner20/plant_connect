@@ -1,7 +1,5 @@
 require_relative 'plant'
 require_relative 'plants_storage'
-require 'yaml'
-require 'bcrypt'
 require 'bundler/setup'
 require 'sinatra'
 
@@ -51,13 +49,6 @@ end
 
 def valid_quantity?(quantity)
   quantity.to_i.to_s == quantity && quantity.to_i >= 0
-end
-
-def find_user(username, password)
-  users = YAML.load_file(file_path('users.yml'))
-  return unless users.key?(username)
-  user = users[username]
-  return user if BCrypt::Password.new(user["hash"]) == password
 end
 
 def verify_quantity(quantity)

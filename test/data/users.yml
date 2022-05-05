@@ -1,6 +1,0 @@
-admin:
-  name: admin
-  hash: "$2a$12$9XM/dMvFXYszdRzJ5XFDBOf8K2743uiiq/6OCYdPRfLE2/hQEAHyG"
-  inventory:
-    name: "My Inventory"
-    plants: []

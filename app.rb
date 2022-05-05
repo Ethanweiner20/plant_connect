@@ -3,6 +3,7 @@ require 'sinatra'
 require 'tilt/erubis'
 require_relative 'lib/helpers'
 require_relative 'lib/plants_storage'
+require_relative 'lib/users'
 require 'pry'
 
 # CONFIGURATION
@@ -34,10 +35,9 @@ ATTRIBUTES = {
 # FILTERS
 
 before do
-  @user = session[:user]
-  @inventory = @user ? @user["inventory"] : nil
-
-  # Load user first, plant storage second
+  @users = Users.new(logger: logger)
+  @user = @users.find_by_id(session[:user_id])
+  @inventory = { "name" => "Test", "plants" => [] }
   @plants_storage = PlantsStorage.new(logger: logger)
 end
 
@@ -58,8 +58,10 @@ end
 # AUTHENTICATION
 
 def logout
-  session.delete(:user)
+  session.delete(:user_id)
 end
+
+# Login
 
 post '/logout' do
   logout
@@ -75,14 +77,36 @@ post '/login' do
   username = params[:username]
   password = params[:password]
 
-  user = find_user(username, password)
-  if user
-    session[:user] = user
+  begin
+    user_id = @users.authenticate(username, password)
+    session[:user_id] = user_id
     redirect '/inventory?page=1'
-  else
-    session[:error] = "Invalid username or password."
+  rescue StandardError => e
+    session[:error] = e.message
     @username = username
     erb :'pages/login'
+  end
+end
+
+# Signup
+
+get '/signup' do
+  logout
+  erb :'pages/signup'
+end
+
+post '/users' do
+  username = params[:username]
+  password = params[:password]
+
+  begin
+    user_id = @users.create(username, password)
+    session[:user_id] = user_id
+    redirect '/inventory?page=1'
+  rescue StandardError => e
+    session[:error] = e.message
+    @username = username
+    erb :'pages/signup'
   end
 end
 
@@ -152,6 +176,7 @@ post '/inventory' do
   verify_uniqueness(params["id"]) do
     verify_quantity(params["quantity"]) do |quantity|
       plant = { id: params["id"], quantity: quantity }
+      binding.pry
       @inventory["plants"].unshift(plant)
     end
   end
@@ -206,25 +231,4 @@ end
 # end
 
 # post '/users/plants/:id' do
-# end
-
-# SIGNUP
-
-# get '/signup' do
-#   # Temporary
-#   redirect '/login'
-#   logout
-#   erb :signup
-# end
-
-# def strong_password?(password)
-#   password =~ /.{8,}/ && password =~ /[A-Z]/ && password =~ /[0-9]/
-# end
-
-# def valid_signup_credentials?(username, password, users)
-#   !users.key?(username) && strong_password?(password)
-# end
-
-# post '/users' do
-#   redirect '/inventory?page=1'
 # end

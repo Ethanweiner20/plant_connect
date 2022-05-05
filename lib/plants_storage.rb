@@ -1,5 +1,6 @@
 require 'pg'
-require_relative './plant'
+require_relative 'plant'
+require_relative 'dbconnection'
 
 class NoPlantFoundError < StandardError
   def initialize(msg="No plant found.")
@@ -7,23 +8,12 @@ class NoPlantFoundError < StandardError
   end
 end
 
-class PlantsStorage
+class PlantsStorage < DBConnection
   PAGE_LIMIT = 6
 
   NUMERICAL_FILTERS = %w(precipitation_minimum
                          precipitation_maximum
                          temperature_minimum)
-
-  def initialize(logger: nil)
-    @db = PG.connect(dbname: 'bloomshare') # Configure for production
-    @csv_path = 'data/plants.csv'
-    @logger = logger
-  end
-
-  def query(sql, params)
-    @logger.info(sql) if @logger
-    @db.exec_params(sql, params)
-  end
 
   # search : Hash of Filters, Integer -> List of Plants
   # Returns a list of `PAGE_LIMIT` plants starting at a given offset

@@ -24,14 +24,14 @@ ALTER COLUMN temperature_minimum TYPE integer
 
 ALTER TABLE plants
 ADD COLUMN is_public boolean NOT NULL DEFAULT false,
-ADD COLUMN created_by integer; -- Reference users (id)
+ADD COLUMN created_by text;
 
 UPDATE plants
 SET is_public = true;
 
 CREATE TABLE users
 (
-  id serial PRIMARY KEY,
+  id text PRIMARY KEY,
   username text NOT NULL,
   password_hash text NOT NULL,
   num_plants_added integer CHECK(num_plants_added < 20)
