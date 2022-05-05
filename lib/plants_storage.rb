@@ -15,6 +15,7 @@ Note: Uses the `Plant` class for plant creation
 require 'pg'
 require 'csv'
 require_relative './plant'
+require 'pry'
 
 class NoPlantFoundError < StandardError
   def initialize(msg="No plant found.")
@@ -23,91 +24,103 @@ class NoPlantFoundError < StandardError
 end
 
 class PlantsStorage
-  PAGE_LIMIT = 20
-
-  READ_FORM = "r:ISO-8859-1"
+  PAGE_LIMIT = 10
 
   NUMERICAL_FILTERS = %w(precipitation_minimum
                          precipitation_maximum
                          temperature_minimum)
 
-  def initialize(logger: nil, user_id: nil)
-    @db = PG.connect(dbname: 'plants') # Configure for production
+  def initialize(logger: nil)
+    @db = PG.connect(dbname: 'bloomshare') # Configure for production
     @csv_path = 'data/plants.csv'
     @logger = logger
-    @user_id = user_id
   end
 
-  # find_by_id : String -> Plant
-  # Returns a singular plant with the given `id`
-  def find_by_id(id)
-    result = search({ "SpeciesID" => id }, limit: 1)
-
-    if result[:plants].empty?
-      raise NoPlantFoundError.new, "No plant found with id #{id}."
-    end
-
-    result[:plants][0]
+  def query(sql, params)
+    @logger.info(sql) if @logger
+    @db.exec_params(sql, params)
   end
 
   # search : Hash of Filters, Integer -> List of Plants
   # Returns a list of `PAGE_LIMIT` plants starting at a given offset
   # Only includes public plants or plants created by the current user
   # rubocop:disable Metrics/MethodLength
-  def search(filters, max_index: 500, limit: PAGE_LIMIT)
+  def search(filters, limit: PAGE_LIMIT)
     # Note: Add functionality to include user-specific plants to result
-    filters = filters.reject { |_, value| !value || value.empty? }
-    return { plants: [], last_index: 0 } if filters.empty?
+    filters = filters.reject do |_, value|
+      !value || value.empty?
+    end
 
-    # index = 0
-    # plants = []
+    return [] if filters.empty?
 
-    # CSV.foreach(@csv_path, READ_FORM, headers: true, liberal_parsing: true) do |row|
-    #   index += 1
-    #   if match?(row, filters)
-    #     plants << Plant.new(row.to_h)
-    #     break if plants.size == limit
-    #   end
+    # We must create a string that interpolates all filters
+    conditions_string, condition_params = filters_to_conditions(filters)
 
-    #   # TEMPORARY
-    #   break if index >= max_index
-    # end
+    sql = <<~SQL
+          SELECT * FROM plants
+            WHERE #{conditions_string} AND is_public = true
+          ORDER BY scientific_name
+          LIMIT $1;
+          SQL
 
-    { plants: plants, last_index: index }
+    result = query(sql, [limit] + condition_params)
+    result.map { |tuple| Plant.new(tuple) }
   end
   # rubocop:enable Metrics/MethodLength
 
-  def match?(row, filters)
-    filters.all? do |key, value|
-      raise "Invalid filter: #{key}" unless row[key]
-      values_match?(key, row[key], value)
-    end
-  end
+  # Retrieves a conditions string & associated parameters for that string
+  # Just use a manual approach
+  def filters_to_conditions(filters, first_placeholder: 2)
+    conditions = []
+    condition_params = []
+    n = first_placeholder
 
-  def values_match?(key, actual_value, search_value)
-    if NUMERICAL_FILTERS.include?(key)
-      in_range?(search_value, actual_value)
-    elsif search_value.is_a? Array
-      arrays_overlap?(actual_value.split(/(, )|( and )/), search_value)
-    else
-      strings_match?(actual_value, search_value)
-    end
-  end
+    filters.each do |filter, value|
+      if filter == 'id'
+        conditions << "(#{filter} = $#{n})"
+        condition_params.push(value.to_i)
+        n += 1
+      elsif NUMERICAL_FILTERS.include?(filter)
+        min, max = value.split(', ')
+        conditions << "(#{filter} BETWEEN $#{n} AND $#{n + 1})"
+        condition_params.push(min, max)
+        n += 2
+      elsif value.is_a? Array
+        sub_conditions = []
+        value.each do |option|
+          sub_conditions << "#{filter} ~* $#{n}"
+          condition_params.push(option)
+          n += 1
+        end
 
-  def in_range?(range_string, value)
-    min, max = range_string.split(', ').map(&:to_i)
-    (min..max).cover?(value.to_i)
-  end
-
-  def strings_match?(actual_string, search_string)
-    actual_string.strip.downcase.include?(search_string.strip.downcase)
-  end
-
-  def arrays_overlap?(actual_array, search_array)
-    search_array.any? do |search_ele|
-      actual_array.any? do |actual_ele|
-        actual_ele.downcase == search_ele.downcase
+        conditions << "(#{sub_conditions.join(' OR ')})"
+      else
+        conditions << "(#{filter} ~* $#{n})"
+        condition_params.push(value)
+        n += 1
       end
     end
+    
+    [conditions.join(' AND '), condition_params]
+  end
+
+  # find_by_id : String -> Plant
+  # Returns a singular plant with the given `id`
+  def find_by_id(id)
+    result = search({ "id" => id }, limit: 1)
+
+    if result.empty?
+      raise NoPlantFoundError.new, "No plant found with id #{id}."
+    end
+
+    result[0]
+  end
+
+  def filters_to_conditions_string(filters)
+    conditions = filters.map do |key, value|
+      filter_to_condition(key, value)
+    end
+
+    conditions.join(' AND ')
   end
 end

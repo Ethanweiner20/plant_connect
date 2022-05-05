@@ -19,7 +19,7 @@ helpers do
 
   def generate_attribute_item(attribute, plant)
     value = plant[attribute]
-    attribute_name = attribute.split(/(?=[A-Z])/).join(' ')
+    attribute_name = attribute.split('_').join(' ')
     "<li>#{attribute_name}: <strong>#{value}</strong></li>" if value
   end
 end
@@ -106,8 +106,7 @@ end
 
 def render_search_results(filters)
   result = @plants_storage.search(filters)
-  @plants_storage = mix_in_inventory(result[:plants])
-  @last_index = result[:last_index]
+  @plants_storage = mix_in_inventory(result)
 
   erb(:'components/plants', layout: nil)
 end

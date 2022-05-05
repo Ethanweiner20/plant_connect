@@ -39,12 +39,12 @@ const deleteLinkHTML = `
 
 // Add inputs
 function addTextInput(name) {
-  const inputName = name.replace(/\s/g, "");
+  const label = name.charAt(0).toUpperCase() + name.replace("_", " ").slice(1);
 
   $("div.filters").append(`
     <div class="col-sm-6 col-md-4 col-lg-3 col-12">
-      <label for="${inputName}">${name}${deleteLinkHTML}</label>
-      <input type="text" name="${inputName}" id="${inputName}" class="form-control" placeholder="${inputName}" />
+      <label for="${name}">${label}${deleteLinkHTML}</label>
+      <input type="text" name="${name}" id="${name}" class="form-control" placeholder="${label}" />
     </div>`);
 }
 
@@ -59,12 +59,12 @@ function checkboxHTML(name, option) {
 }
 
 function addCheckboxInput(name, options) {
-  const inputName = name.replace(/\s/g, "");
+  const label = name.charAt(0).toUpperCase() + name.replace("_", " ").slice(1);
 
   const html = `
   <div class="col-sm-6 col-md-4 col-lg-3 col-12">
-    <label>${name}${deleteLinkHTML}</label>
-    ${options.map((value) => checkboxHTML(inputName, value)).join("")}
+    <label>${label}${deleteLinkHTML}</label>
+    ${options.map((value) => checkboxHTML(name, value)).join("")}
   </div>
   `;
 

@@ -5,8 +5,8 @@
         <div class="container-fluid py-3">
           <div class="row">
             <div class="col">
-              <h1><%= @plant["CommonName"] %></h1>
-              <h2 class="text-muted"><%= @plant["ScientificName"] %></h2>
+              <h1><%= @plant["common_name"] %></h1>
+              <h2 class="text-muted"><%= @plant["scientific_name"] %></h2>
               <%== erb :'components/plant_metadata', layout: nil, locals: { :plant => @plant } %>
               <%== erb :'forms/quantity_form', layout: nil, locals: { :plant => @plant } %>
             </div>
@@ -36,16 +36,16 @@
       <div class="col-12 col-sm-6 col-md-6 col-lg-4 p-3 mb-4 rounded-3">
         <div class="h-100 p-3 text-white bg-primary rounded-3">
           <h3>Growth Requirements</h3>
-          <% if @plant["Precipitation_Minimum"] && @plant["Precipitation_Maximum"] %>
+          <% if @plant["precipitation_minimum"] && @plant["precipitation_maximum"] %>
             <li>Precipitation Needed: 
               <strong>
-                <%= @plant["Precipitation_Minimum"] + '-' + @plant["Precipitation_Maximum"] %>
+                <%= @plant["precipitation_minimum"] + '-' + @plant["precipitation_maximum"] %>
                 inches
               </strong>
             </li>
           <% end %>
-          <% if @plant["TemperatureMinimum"] %>
-            <li>Minimum Temperature: <strong><%= @plant["TemperatureMinimum"] %>&deg;F</strong></li>
+          <% if @plant["temperature_minimum"] %>
+            <li>Minimum Temperature: <strong><%= @plant["temperature_minimum"] %>&deg;F</strong></li>
           <% end %>
           <%== generate_attribute_group(:growth_requirements, @plant) %>
         </div>
@@ -74,7 +74,7 @@
           <% if @plant.states %>
             <li>States: <strong><%= @plant.states %></strong></li>
           <% end %>
-          <% if @plant["PalatableHuman"] == 'Yes' %>
+          <% if @plant["palatable_human"] == 'Yes' %>
             <li>Palatable for Humans</li>
           <% end %>
         </div>

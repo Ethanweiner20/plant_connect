@@ -6,13 +6,13 @@
     <div class="row gy-3">
       <% @plants_storage.each do |plant| %>
         <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
-          <div class="card bg-light h-100">
+          <div class="card bg-light">
             <a href="/plants/<%= plant.id %>" >
               <div class="card-body">
                 <%# Color Based on Flower Color %>
-                <h5 class="card-title text-success"><%= plant["CommonName"] %></h5>
+                <h5 class="card-title text-success"><%= plant["common_name"] %></h5>
                 <h6 class="card-subtitle mb-2 text-muted">
-                  <%= plant["ScientificName"] %>
+                  <%= plant["scientific_name"] %>
                 </h6>
                 <%== erb :'components/plant_metadata', layout: nil, locals: { :plant => plant } %>
               </div>

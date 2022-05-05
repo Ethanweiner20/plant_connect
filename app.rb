@@ -20,14 +20,14 @@ end
 # CONSTANTS
 
 ATTRIBUTES = {
-  taxonomy: %w(Class Order Family Genus Species),
-  timing: %w(Duration BloomPeriod ActiveGrowthPeriod GrowthRate Lifespan),
-  growth_requirements: %w(DroughtTolerance ShadeTolerance FireRestistance
-                          FertilityRequirement),
-  reproduction: %w(ResproutAbility SeedSpreadRate),
-  physical_characteristics: %w(MatureHeight GrowthHabit GrowthForm
-                               FoliageTexture),
-  colors: %w(FoliageColor FlowerColor FruitColor)
+  taxonomy: %w(class order family genus species),
+  timing: %w(duration bloom_period active_growth_period growth_rate lifespan),
+  growth_requirements: %w(drought_tolerance shade_tolerance fire_resistance
+                          fertility_requirement),
+  reproduction: %w(resprout_ability seed_spread_rate),
+  physical_characteristics: %w(mature_height growth_habit growth_form
+                               foliage_texture),
+  colors: %w(foliage_color flower_color fruit_color)
 }
 
 # FILTERS

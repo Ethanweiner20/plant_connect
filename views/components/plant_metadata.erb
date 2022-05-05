@@ -1,17 +1,17 @@
 <ul>
-  <% if plant["Duration"] %>
-    <li class="text-dark"><strong><%= plant["Duration"] %></strong></li>
+  <% if plant["duration"] %>
+    <li class="text-dark"><strong><%= plant["duration"] %></strong></li>
   <% end %>
-  <% if plant["GrowthHabit"] %>
-    <li class="text-dark">Growth Habit: <strong><%= plant["GrowthHabit"] %></strong></li>
+  <% if plant["growth_habit"] %>
+    <li class="text-dark">Growth Habit: <strong><%= plant["growth_habit"] %></strong></li>
   <% end %>
-  <% if plant["MatureHeight"] %>
-    <li class="text-dark">Height: <strong><%= plant["MatureHeight"] %> feet</strong></li>
+  <% if plant["mature_height"] %>
+    <li class="text-dark">Height: <strong><%= plant["mature_height"] %> feet</strong></li>
   <% end %>
   <% unless plant.colors.empty? %>
     <li class="text-dark">Colors: <strong><%= plant.colors.join(', ') %></strong></li>
   <% end %>
-  <% if ["Medium", "High"].include?(plant["DroughtTolerance"]) %>
+  <% if ["Medium", "High"].include?(plant["drought_tolerance"]) %>
     <li class="text-dark"><strong>Drought Tolerant</strong></li>
   <% end %>
 </ul>

@@ -11,6 +11,8 @@ require "rack/test"
 
 require_relative '../lib/plants_storage'
 
+require 'pry'
+
 class PlantsTest < MiniTest::Test
   def setup
     @plants_storage = PlantsStorage.new
@@ -18,99 +20,58 @@ class PlantsTest < MiniTest::Test
 
   # rubocop:disable Metrics/LineLength
   def test_common_name
-    assert_equal 1, @plants_storage.search({ "CommonName" => "Arizona boxelder" }, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
-    assert_equal 1, @plants_storage.search({ "CommonName" => "Arizona boxe" }, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
-    assert_equal 1, @plants_storage.search({ "CommonName" => "arizona Boxelder" }, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
-    assert_equal 2, @plants_storage.search({ "CommonName" => "Boxelder" }, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
+    assert_equal 1, @plants_storage.search({ "common_name" => "amethyst eryngo" }).size
+    assert_equal 1, @plants_storage.search({ "common_name" => "st Eryngo" }).size
   end
 
   def test_no_filters
-    skip
-    assert_equal 0, @plants_storage.search({}, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
+    assert_equal 0, @plants_storage.search({}).size
   end
 
   def test_empty_filters
-    skip
     filters = {
-      "CommonName" => "Arizona boxelder",
-      "ScientificName" => ""
+      "common_name" => "amethyst eryngo",
+      "scientific_name" => ""
     }
-    assert_equal 1, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
 
-    filters = {
-      "CommonName" => "Arizona boxelder",
-      "ScientificName" => nil
-    }
-    assert_equal 1, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
+    assert_equal 1, @plants_storage.search(filters).size
   end
 
   def test_multiple_filters
-    skip
     filters = {
-      "CommonName" => "Arizona boxelder",
-      "ScientificName" => "Acer negundo var. arizonicum"
+      "common_name" => "amethyst eryngo",
+      "scientific_name" => "Amethystinum"
     }
 
-    assert_equal 1, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
-
-    filters = {
-      "CommonName" => " boxelder",
-      "ScientificName" => "acer"
-    }
-
-    assert_equal 2, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
+    assert_equal 1, @plants_storage.search(filters).size
   end
 
   def test_invalid_filters
-    skip
     filters = {
-      "Com Name" => " boxelder",
-      "ScientificName" => "acer"
+      "CommonName" => " boxelder"
     }
 
-    assert_raises(StandardError) { @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size }
+    assert_raises(StandardError) { @plants_storage.search(filters) }
   end
 
   def test_search_limit
-    skip
-    filters = { "Genus" => "Acer" }
-    assert_equal PlantsStorage::SEARCH_LIMIT, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
+    filters = { "genus" => "Acer" }
+    assert_equal PlantsStorage::PAGE_LIMIT, @plants_storage.search(filters).size
   end
 
   def test_multi_value_filter
-    skip
-    filters = { "Genus" => "Albizia", "GrowthHabit" => ["Tree", "Shrub"] }
-    assert_equal 4, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
-
-    filters = { "Genus" => "Albizia", "GrowthHabit" => ["Tree"] }
-    assert_equal 4, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
-
-    filters = { "Genus" => "Albizia", "GrowthHabit" => ["Shrub"] }
-    assert_equal 1, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
-  end
-
-  def test_mulit_value_filter_with_and
-    skip
-    filters = { "Genus" => "Agrostis", "ActiveGrowthPeriod" => ["Spring", "Summer"] }
-    assert_equal 2, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
-
-    filters = { "Genus" => "Agrostis", "ActiveGrowthPeriod" => ["Summer"] }
-    assert_equal 2, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
+    filters = { "common_name" => "am", "flower_color" => %w(pink orange) }
+    assert_equal 1, @plants_storage.search(filters).size
   end
 
   def test_range
-    skip
-    # Question: What is the minimum precipitation the plant needs?
-    filters = { "Genus" => "Abies", "Precipitation_Minimum" => "20, 42" }
-    assert_equal 3, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
+    filters = { "precipitation_minimum" => "50, 60" }
+    assert_equal 5, @plants_storage.search(filters).size
+  end
 
-    # Question: What is the maximum precipitation the plant can withstand?
-    filters = { "Genus" => "Abies", "Precipitation_Maximum" => "75, 85" }
-    assert_equal 2, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
-
-    # Return all plants whose min temperature is between the two values
-    filters = { "Genus" => "Abies", "TemperatureMinimum" => "-40, -20" }
-    assert_equal 2, @plants_storage.search(filters, max_index: TEMPORARY_SEARCH_LIMIT)[:plants].size
+  def test_search_by_id
+    filters = { "id" => "10" }
+    assert_equal "alder", @plants_storage.search(filters)[0]["common_name"]
   end
 
   def test_offset; end

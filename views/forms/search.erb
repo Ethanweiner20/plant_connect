@@ -3,12 +3,12 @@
   <div class="container">
     <div class="row gy-4 mb-2">
       <div class="col-sm-6 col-12">
-        <label for="CommonName">Common Name</label>
-        <input type="text" name="CommonName" id="CommonName" class="form-control" placeholder="Yarrow" value="<%= params["CommonName"] %>" />
+        <label for="common_name">Common Name</label>
+        <input type="text" name="common_name" id="common_name" class="form-control" placeholder="Yarrow" value="<%= params["common_name"] %>" />
       </div>
       <div class="col-sm-6 col-12">
-        <label for="ScientificName">Scientific Name</label>
-        <input type="text" name="ScientificName" id="ScientificName" class="form-control" placeholder="Achillea millefolium" value="<%= params["ScientificName"] %>">
+        <label for="scientific_name">Scientific Name</label>
+        <input type="text" name="scientific_name" id="scientific_name" class="form-control" placeholder="Achillea millefolium" value="<%= params["scientific_name"] %>">
       </div>
     </div>
     <div class="row gy-4 my-1 filters">
@@ -25,19 +25,19 @@
               <a class="dropdown-item" href="#">Taxonomy &raquo;</a>
               <ul class="dropdown-menu dropdown-submenu">
                 <li>
-                  <a href="#" class="dropdown-item add-text-input" data-input-name="Class">Class</a>
+                  <a href="#" class="dropdown-item add-text-input" data-input-name="class">Class</a>
                 </li>
                 <li>
-                  <a href="#" class="dropdown-item add-text-input" data-input-name="Order">Order</a>
+                  <a href="#" class="dropdown-item add-text-input" data-input-name="order">Order</a>
                 </li>
                 <li>
-                  <a href="#" class="dropdown-item add-text-input" data-input-name="Family">Family</a>
+                  <a href="#" class="dropdown-item add-text-input" data-input-name="family">Family</a>
                 </li>
                 <li>
-                  <a href="#" class="dropdown-item add-text-input" data-input-name="Genus">Genus</a>
+                  <a href="#" class="dropdown-item add-text-input" data-input-name="genus">Genus</a>
                 </li>
                 <li>
-                  <a href="#" class="dropdown-item add-text-input" data-input-name="Species">Species</a>
+                  <a href="#" class="dropdown-item add-text-input" data-input-name="species">Species</a>
                 </li>
               </ul>
             </li>
@@ -46,17 +46,17 @@
               <ul class="dropdown-menu dropdown-submenu">
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Duration"
+                     data-input-name="duration"
                      data-options="Annual, Perennial, Biennial, Year Round">Duration</a>
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Active Growth Period"
+                     data-input-name="active_growth_period"
                      data-options="Spring, Summer, Fall, Winter">Active Growth Period</a>
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Bloom Period"
+                     data-input-name="bloom_period"
                      data-options="Early Spring, Mid Spring, Late Spring, 
                      Spring, Early Summer, Mid Summer, Late Summer, Summer, Fall, Winter">
                     Bloom Period
@@ -64,12 +64,12 @@
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Growth Rate"
+                     data-input-name="growth_rate"
                      data-options="Slow, Moderate, Rapid">Growth Rate</a>
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Lifespan"
+                     data-input-name="lifespan"
                      data-options="Short, Moderate, Long">Lifespan</a>
                 </li>
               </ul>
@@ -79,37 +79,37 @@
               <ul class="dropdown-menu dropdown-submenu">
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Drought Tolerance"
+                     data-input-name="drought_tolerance"
                      data-options="None, Low, Medium, High">Drought Tolerance</a>
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Shade Tolerance"
+                     data-input-name="shade_tolerance"
                      data-options="Intolerant, Intermediate, Tolerant">Shade Tolerance</a>
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Salinity Tolerance"
+                     data-input-name="salinity_tolerance"
                      data-options="None, Low, Medium, High">Salinity Tolerance</a>
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Fire Resistance"
+                     data-input-name="fire_resistance"
                      data-options="None, Low, Medium, High">Fire Resistance</a>
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Fertility Requirement"
+                     data-input-name="fertility_requirement"
                      data-options="None, Low, Medium, High">Fertility Requirement</a>
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Hedge Tolerance"
+                     data-input-name="hedge_tolerance"
                      data-options="None, Low, Medium, High">Hedge Tolerance</a>
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Moisture Use"
+                     data-input-name="moisture_use"
                      data-options="None, Low, Medium, High">Moisture Use</a>
                 </li>
               </ul>
@@ -119,17 +119,17 @@
               <ul class="dropdown-menu dropdown-submenu">
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Flower Color"
+                     data-input-name="flower_color"
                      data-options="Yellow, Purple, Green, Red, Brown, White, Blue, Orange">Flower Color</a>
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Foliage Color"
+                     data-input-name="foliage_color"
                      data-options="Green, Dark Green, Gray-Green, Yellow-Green">Foliage Color</a>
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Fruit Color"
+                     data-input-name="fruit_color"
                      data-options="Yellow, Purple, Green, Red, Brown, White, Blue, Orange, Black">Fruit Color</a>
                 </li>
               </ul>
@@ -139,12 +139,12 @@
               <ul class="dropdown-menu dropdown-submenu">
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Resprout Ability"
+                     data-input-name="resprout_ability"
                      data-options="Yes, No">Resprout Ability</a>
                 </li>
                 <li>
                   <a href="#" class="dropdown-item add-checkbox-input"
-                     data-input-name="Seed Spread Rate"
+                     data-input-name="seed_spread_rate"
                      data-options="None, Slow, Moderate, Rapid">Seed Spread Rate</a>
                 </li>
               </ul>
@@ -153,17 +153,17 @@
               <a class="dropdown-item" href="#">Physical Traits &raquo;</a>
               <ul class="dropdown-menu dropdown-submenu">
                 <li>
-                  <a class="dropdown-item add-checkbox-input" href="#" data-input-name="Growth Habit"
+                  <a class="dropdown-item add-checkbox-input" href="#" data-input-name="growth_habit"
                 data-options="Tree, Shrub, Forb/herb, Subshrub, Vine, Graminoid, Lichenous, Nonvascular"
               >Growth Habit</a>
                 </li>
                 <li>
-                  <a class="dropdown-item add-checkbox-input" href="#" data-input-name="Growth Form"
+                  <a class="dropdown-item add-checkbox-input" href="#" data-input-name="growth_form"
                 data-options="Single Stem, Multiple Stem, Single Crown, Stoloniferous, Rhizomatous, Thicket Forming, Bunch"
               >Growth Form</a>
                 </li>
                 <li>
-                  <a class="dropdown-item add-checkbox-input" href="#" data-input-name="Foliage Texture"
+                  <a class="dropdown-item add-checkbox-input" href="#" data-input-name="foliage_texture"
                 data-options="Fine, Medium, Coarse"
                   >Foliage Texture</a>
                 </li>
@@ -173,8 +173,7 @@
               <a class="dropdown-item" href="#">Miscellaneous &raquo;</a>
               <ul class="dropdown-menu dropdown-submenu">
                 <li>
-                  <a class="dropdown-item add-states-input" href="#" data-input-name="States"
-                    data-options="Fine, Medium, Coarse"
+                  <a class="dropdown-item add-states-input" href="#" data-input-name="states"
                   >States</a>
                 </li>
               </ul>
