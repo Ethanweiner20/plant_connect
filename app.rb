@@ -78,7 +78,7 @@ post '/login' do
   user = find_user(username, password)
   if user
     session[:user] = user
-    redirect '/inventory'
+    redirect '/inventory?page=1'
   else
     session[:error] = "Invalid username or password."
     @username = username
@@ -135,7 +135,10 @@ get '/inventory' do
   @page = set_page_number
   @pagination_pages = pagination_pages(@page)
 
-  if params.empty? || params.values.all?(&:empty?)
+  if !params.key?(:page)
+    session[:error] = "No page was provided."
+    erb :'forms/search'
+  elsif params.empty? || params.values.all?(&:empty?)
     erb(:'forms/search') + render_inventory
   else
     filters = params.clone
@@ -223,5 +226,5 @@ end
 # end
 
 # post '/users' do
-#   redirect '/inventory'
+#   redirect '/inventory?page=1'
 # end

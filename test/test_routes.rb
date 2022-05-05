@@ -123,12 +123,12 @@ class BloomShareTest < MiniTest::Test
   end
 
   def test_authenticated_route_success
-    get '/inventory', {}, @admin_session
+    get '/inventory?page=1', {}, @admin_session
     assert_equal 200, last_response.status
   end
 
   def test_authenticated_route_failure
-    get '/inventory', {}
+    get '/inventory?page=1', {}
     assert_equal 302, last_response.status
 
     get last_response["Location"]
@@ -153,64 +153,64 @@ class BloomShareTest < MiniTest::Test
   end
 
   def test_inventory_no_filters
-    get '/inventory', {}, @admin_session
+    get '/inventory?page=1', {}, @admin_session
     assert_equal 200, last_response.status
     assert_includes last_response.body, "silver fir"
     assert_includes last_response.body, "New Amount"
   end
 
   def test_inventory_with_filters
-    get '/inventory', { "CommonName" => "Silver" }, @admin_session
+    get '/inventory?page=1', { "CommonName" => "Silver" }, @admin_session
     assert_equal 200, last_response.status
     assert_includes last_response.body, "silver fir"
     assert_includes last_response.body, "New Amount"
 
-    get '/inventory', { "CommonName" => "1234" }, @admin_session
+    get '/inventory?page=1', { "CommonName" => "1234" }, @admin_session
     assert_equal 200, last_response.status
     assert_includes last_response.body, "No plants found."
   end
 
   def test_add_plant
     plant = { id: "10", quantity: 5 }
-    post '/inventory', plant, @admin_session
+    post '/inventory?page=1', plant, @admin_session
     assert_includes session["user"]["inventory"]["plants"], plant
   end
 
   def test_add_duplicate
     plant = { id: "4", quantity: 15 }
-    post '/inventory', plant, @admin_session
+    post '/inventory?page=1', plant, @admin_session
     assert_equal 400, last_response.status
   end
 
   def test_add_plant_invalid_quantity
     plant = { id: "10", quantity: 0.5 }
-    post '/inventory', plant, @admin_session
+    post '/inventory?page=1', plant, @admin_session
     assert_equal 400, last_response.status
 
     plant = { id: "10", quantity: -15 }
-    post '/inventory', plant, @admin_session
+    post '/inventory?page=1', plant, @admin_session
     assert_equal 400, last_response.status
 
     plant = { id: "10", quantity: "abc" }
-    post '/inventory', plant, @admin_session
+    post '/inventory?page=1', plant, @admin_session
     assert_equal 400, last_response.status
   end
 
   def test_update_quantity
     plant = { id: "4", quantity: 100 }
-    post '/inventory/4/update', plant, @admin_session
+    post '/inventory?page=1/4/update', plant, @admin_session
     assert_includes session["user"]["inventory"]["plants"], plant
   end
 
   def test_update_quantity_invalid_plant
     plant = { id: "5", quantity: 100 }
-    post '/inventory/5/update', plant, @admin_session
+    post '/inventory?page=1/5/update', plant, @admin_session
     assert_equal 400, last_response.status
     assert_includes last_response.body, "This plant is not in your inventory."
   end
 
   def test_delete_plant
-    post '/inventory/4/delete', {}, @admin_session
+    post '/inventory?page=1/4/delete', {}, @admin_session
     assert_equal 204, last_response.status
     assert_equal 0, session["user"]["inventory"]["plants"].size
     refute_includes session["user"]["inventory"]["plants"], @plant
