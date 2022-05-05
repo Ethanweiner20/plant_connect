@@ -84,8 +84,10 @@ class BloomShareTest < MiniTest::Test
     assert_includes last_response.body, "Invalid username or password."
   end
 
+  # Note: Adds user to the database
   def test_successful_signup
     skip
+
     post '/users', { "username" => "noah", "password" => "Noah12999" }
 
     assert_equal 302, last_response.status
@@ -100,20 +102,18 @@ class BloomShareTest < MiniTest::Test
   end
 
   def test_invalid_password_signup
-    skip
     post '/users', { "username" => "noah", "password" => "Noah" }
 
     assert_equal 200, last_response.status
-    assert_includes last_response.body, "Password must contain at least 8
-      characters, a number, and uppercase letter."
+    assert_includes last_response.body, "Password must contain at least 8 "\
+                                        "characters, a number, and uppercase letter."
   end
 
   def test_username_taken_signup
-    skip
-    post '/users', { "username" => "ethan", "password" => "GoodPassword123" }
+    post '/users', { "username" => "admin", "password" => "GoodPassword123" }
 
     assert_equal 200, last_response.status
-    assert_includes last_response.body, "Username is already taken."
+    assert_includes last_response.body, "Username 'admin' is already taken."
   end
 
   def test_authenticated_route_success

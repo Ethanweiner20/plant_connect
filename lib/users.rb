@@ -19,7 +19,7 @@ end
 
 class NonUniqueUsernameError < StandardError
   def initialize(username)
-    msg = "A user with the username '#{username}' already exists."
+    msg = "Username '#{username}' is already taken."
     super(msg)
   end
 end
