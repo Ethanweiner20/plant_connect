@@ -4,6 +4,7 @@ require 'tilt/erubis'
 require_relative 'lib/helpers'
 require_relative 'lib/plants_storage'
 require_relative 'lib/users'
+require_relative 'lib/inventories'
 require 'pry'
 
 # CONFIGURATION
@@ -37,8 +38,11 @@ ATTRIBUTES = {
 before do
   @users = Users.new(logger: logger)
   @user = @users.find_by_id(session[:user_id])
-  @inventory = { "name" => "Test", "plants" => [] }
+
   @plants_storage = PlantsStorage.new(logger: logger)
+  @inventories = Inventories.new(logger: logger)
+  # Temporary: Inventory should load by name
+  @inventory = { "name" => "Test", "plants" => [] }
 end
 
 PROTECTED_ROUTES = ['/inventory*', '/community*', '/settings']
@@ -81,7 +85,7 @@ post '/login' do
     user_id = @users.authenticate(username, password)
     session[:user_id] = user_id
     redirect '/inventory?page=1'
-  rescue StandardError => e
+  rescue InvalidLoginCredentialsError => e
     session[:error] = e.message
     @username = username
     erb :'pages/login'
@@ -100,10 +104,10 @@ post '/users' do
   password = params[:password]
 
   begin
-    user_id = @users.create(username, password)
+    user_id = @users.create(username, password, @inventories)
     session[:user_id] = user_id
     redirect '/inventory?page=1'
-  rescue StandardError => e
+  rescue InsecurePasswordError, NonUniqueUsernameError => e
     session[:error] = e.message
     @username = username
     erb :'pages/signup'

@@ -9,7 +9,10 @@ end
 
 desc 'Run tests'
 task 'test' do
-  sh "bundle exec ruby test/test.rb"
+  Dir.glob("#{ROOT}/test/*.rb").each do |filename|
+    p filename
+    sh "bundle exec ruby #{filename}"
+  end
 end
 
 desc 'Run tests and view coverage results'

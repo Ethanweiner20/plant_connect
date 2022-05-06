@@ -2,6 +2,7 @@ require 'securerandom'
 require_relative 'helpers'
 require 'yaml'
 require 'bcrypt'
+require_relative 'inventories'
 require_relative 'dbconnection'
 
 class InvalidLoginCredentialsError < StandardError
@@ -48,7 +49,7 @@ class Users < DBConnection
     end
   end
 
-  def create(username, password)
+  def create(username, password, inventories)
     raise InsecurePasswordError.new unless strong_password?(password)
     raise NonUniqueUsernameError.new(username) if find_by_username(username)
 
@@ -58,6 +59,7 @@ class Users < DBConnection
     sql = 'INSERT INTO users (id, username, password_hash) VALUES ($1, $2, $3)'
     query(sql, [uuid, username, password_hash])
 
+    inventories.add(uuid, "#{username}'s Plants")
     uuid
   end
 

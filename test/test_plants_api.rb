@@ -79,7 +79,7 @@ class PlantsTest < MiniTest::Test
     assert_equal PlantsStorage::PAGE_LIMIT, @plants_storage.search(filters, page: 2).size
 
     filters = { "genus" => "Acer" }
-    assert_equal 0, @plants_storage.search(filters, page: 3).size
+    assert_equal 0, @plants_storage.search(filters, page: 5).size
   end
   # rubocop:enable Metrics/LineLength
 end
