@@ -20,11 +20,13 @@
                 <%== erb :'components/plant_metadata', layout: nil, locals: { :plant => plant } %>
               </div>
             </a>
-            <% if @user %>
-              <div class="card-footer">
+            <div class="card-footer">
+              <% if ['/plants', '/inventories/user'].include?(request.path) %>
                 <%== erb(:'forms/quantity_form', layout: nil, locals: { plant: plant }) %>
-              </div>
-            <% end %>
+              <% elsif plant.is_a? InventoryPlant %>
+                <p>Quantity: <%= plant.quantity %></p>
+              <% end %>
+            </div>
           </div>
         </div>
       <% end %>
@@ -36,7 +38,7 @@
     <% end %>
   <% else %>
     <h1 class="text-muted lead text-center mb-3">No plants found.</h1>
-    <% if request.path == '/inventory' %>
+    <% if request.path == '/inventories/user' %>
       <a href="/plants">
         <p class="text-center">
           Add a new plant here.

@@ -2,23 +2,26 @@ require_relative 'dbconnection'
 require_relative 'inventory'
 
 class Inventories < DBConnection
-  def find(user_id, name: nil)
-    # If no name is provided, choose the first inventory
-    if name
-      sql = <<~SQL
-            SELECT * FROM inventories 
-            WHERE user_id = $1 AND name = $2
-            LIMIT 1
-            SQL
-      result = query(sql, [user_id, name])
-    else
-      sql = <<~SQL
-            SELECT * FROM inventories 
-            WHERE user_id = $1
-            LIMIT 1
-            SQL
-      result = query(sql, [user_id])
-    end
+  def find_by_user_id(user_id)
+    sql = <<~SQL
+          SELECT * FROM inventories 
+          WHERE user_id = $1
+          LIMIT 1
+          SQL
+    result = query(sql, [user_id])
+
+    return if result.ntuples == 0
+
+    Inventory.new(result[0])
+  end
+
+  def find_by_id(id)
+    sql = <<~SQL
+          SELECT * FROM inventories 
+          WHERE id = $1
+          LIMIT 1
+          SQL
+    result = query(sql, [id])
 
     return if result.ntuples == 0
 

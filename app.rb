@@ -42,7 +42,7 @@ before do
   @plants_storage = PlantsStorage.new(logger: logger)
   @inventories = Inventories.new(logger: logger)
   if @user
-    @user_inventory = @inventories.find(@user["id"])
+    @user_inventory = @inventories.find_by_user_id(@user["id"])
     @inventory_id = @user_inventory.id
   end
 end
@@ -51,7 +51,7 @@ after do
   [@users, @plants_storage, @inventories].each(&:close_connection)
 end
 
-PROTECTED_ROUTES = ['/inventory*', '/community*', '/settings']
+PROTECTED_ROUTES = ['/inventories*' '/community*', '/settings']
 
 PROTECTED_ROUTES.each do |route|
   before route do
@@ -112,7 +112,7 @@ post '/users' do
   begin
     user_id = @users.create(username, password, @inventories)
     session[:user_id] = user_id
-    redirect '/inventory?page=1'
+    redirect '/inventories/user?page=1'
   rescue InsecurePasswordError, NonUniqueUsernameError => e
     session[:error] = e.message
     @username = username
@@ -166,15 +166,26 @@ end
 
 # INVENTORY
 
-# Manage inventory
-get '/inventory' do
-  redirect '/login' unless @user
+def set_inventory(id)
+  id == 'user' ? @user_inventory : @inventories.find_by_id(id)
+end
 
-  @title = "Inventory: #{@user_inventory.name}"
+# Manage inventory
+get '/inventories/:inventory_id' do
+  inventory_id = params['inventory_id']
+  @inventory = set_inventory(inventory_id)
+
+  unless @inventory
+    session[:error] = "No public inventory with the id '#{inventory_id}' exists."
+    redirect '/community'
+  end
+
+  @title = "Inventory: #{@inventory.name}"
   @subtitle = "Browse plants saved in your inventory."
 
   filters = params.clone
   filters.delete(:page)
+  filters.delete(:inventory_id)
 
   if !params.key?(:page)
     session[:error] = "No page was provided."
@@ -185,7 +196,7 @@ get '/inventory' do
 
     begin
       @plants = @plants_storage.search_all(filters,
-        inventory_id: @inventory_id,
+        inventory_id: @inventory.id,
         inventory_only: true,
         page: @page)
       erb(:'forms/search') + erb(:'components/plants', layout: nil)
@@ -198,10 +209,10 @@ get '/inventory' do
 end
 
 # [AJAX] Add a plant to a user's inventory
-post '/inventory' do
-  verify_uniqueness(@inventory_id, params["id"]) do
+post '/inventories/user' do
+  verify_uniqueness(@inventory_id, params["plant_id"]) do
     verify_quantity(params["quantity"]) do |quantity|
-      plant_id = params["id"].to_i
+      plant_id = params["plant_id"].to_i
       quantity = params["quantity"].to_i
       inventory_id = @inventory_id
       @inventories.add_plant(plant_id, quantity, inventory_id)
@@ -211,10 +222,10 @@ post '/inventory' do
 end
 
 # [AJAX] Update quantity of plant in inventory
-post '/inventory/:id/update' do
-  verify_in_inventory(@inventory_id, params["id"]) do
+post '/inventories/user/:plant_id/update' do
+  verify_in_inventory(@inventory_id, params["plant_id"]) do
     verify_quantity(params["quantity"]) do |quantity|
-      plant_id = params["id"].to_i
+      plant_id = params["plant_id"].to_i
       quantity = params["quantity"].to_i
       inventory_id = @inventory_id
       @inventories.update_plant_quantity(plant_id, quantity, inventory_id)
@@ -225,9 +236,9 @@ end
 
 # [AJAX] Delete plant from inventory
 # Note: Simply disregards faulty ids
-post '/inventory/:id/delete' do
-  verify_in_inventory(@inventory_id, params["id"]) do
-    plant_id = params["id"].to_i
+post '/inventories/user/:plant_id/delete' do
+  verify_in_inventory(@inventory_id, params["plant_id"]) do
+    plant_id = params["plant_id"].to_i
     inventory_id = @inventory_id
     @inventories.delete_plant(plant_id, inventory_id)
     status 204
@@ -238,7 +249,6 @@ end
 
 get '/community' do
   @title = "Community"
-  redirect '/login' unless @user
   erb :'pages/community'
 end
 

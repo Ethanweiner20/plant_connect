@@ -4,7 +4,7 @@ class Inventory
   attr_reader :name, :id
 
   def initialize(data)
-    @id = data["id"]
+    @id = data["id"].to_i
     @name = data["name"]
   end
 end

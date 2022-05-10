@@ -1,7 +1,7 @@
 <script src="/scripts/quantity_form.js"></script>
 <%# Update quantity if plant is already added %>
 <% if plant.is_a? InventoryPlant %>
-  <form class="quantity-form" data-plant-id="<%= plant.id %>" action="/inventory/<%= plant.id %>/update" method="post">
+  <form class="quantity-form" data-plant-id="<%= plant.id %>" action="/inventories/user/<%= plant.id %>/update" method="post">
     <input type="hidden" name="id" value="<%= plant.id %>" />
     <div class="row gx-1">
       <div class="col-5">
@@ -24,7 +24,7 @@
     <p class="text-danger d-none"></p>
     <p class="text-success d-none">Updated!</p>
   </form>
-  <form class="delete-plant-form mt-1" action="/inventory/<%= plant.id %>/delete" method="post">
+  <form class="delete-plant-form mt-1" action="/inventories/user/<%= plant.id %>/delete" method="post">
     <div class="d-grid">
       <button type="submit" class="btn btn-outline-danger delete">
         Delete
@@ -37,8 +37,8 @@
   </form>
   <%# Add new plant if plant is not yet added %>
 <% else %>
-  <form id="<%= plant.id %>" class="quantity-form" action="/inventory" method="post">
-    <input type="hidden" name="id" value="<%= plant.id %>" />
+  <form id="<%= plant.id %>" class="quantity-form" action="/inventories/user" method="post">
+    <input type="hidden" name="plant_id" value="<%= plant.id %>" />
     <div class="row p-0">
       <div class="col-5 p-1">
         <input class="form-control"
