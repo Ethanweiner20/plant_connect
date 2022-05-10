@@ -19,35 +19,59 @@ class PlantsStorage < DBConnection
   # Returns a list of `PAGE_LIMIT` plants starting at a given offset
   # Only includes public plants or plants created by the current user
   # rubocop:disable Metrics/MethodLength
-  def search(filters, limit: PAGE_LIMIT, page: 1)
+  def search_all(filters = {}, inventory_id: nil, limit: PAGE_LIMIT, page: 1, inventory_only: false)
     # Note: Add functionality to include user-specific plants to result
     filters = filters.reject do |_, value|
-      !value || value.empty?
+      !value || value == ''
     end
 
-    return [] if filters.empty?
-
     # We must create a string that interpolates all filters
-    conditions_string, condition_params = filters_to_conditions(filters)
+    first_placeholder = inventory_only ? 4 : 3
+    conditions, params = filters_to_conditions(filters, first_placeholder)
     offset = compute_offset(page)
 
+    # If the inventory is required, select only plants from inventory.
+    # Otherwise, select all publicly accessible plants.
+    where_clause = (inventory_only ?
+                   '(inventory_id IS NOT NULL AND inventory_id = $3)' :
+                   'is_public = true') +
+                   (conditions.length > 0 ? ' AND ' + conditions : '')
+
     sql = <<~SQL
-          SELECT * FROM plants
-            WHERE #{conditions_string} AND is_public = true
+          SELECT plants.id AS pid, * FROM plants
+            LEFT OUTER JOIN inventories_plants
+            ON plants.id = inventories_plants.plant_id
+            WHERE #{where_clause} 
           ORDER BY scientific_name
           LIMIT $1
           OFFSET $2;
           SQL
 
-    result = query(sql, [limit, offset] + condition_params)
-    result.map { |tuple| Plant.new(tuple) }
+    result = query(sql, [limit, offset] +
+                        (inventory_only ? [inventory_id] : []) +
+                        params)
+
+    # Transform tuples to Plants or InventoryPlants, dependent on whether a quantity exists
+    result.map do |tuple|
+      if (tuple["inventory_id"] && tuple["inventory_id"].to_i == inventory_id.to_i)
+        InventoryPlant.new(tuple, tuple["quantity"].to_i)
+      else
+        Plant.new(tuple)
+      end
+    end
   end
+
+  # Search inventory only
+  def search_inventory(inventory_id, filters = {})
+    search_all(filters, inventory_id: inventory_id, inventory_only: true)
+  end
+
   # rubocop:enable Metrics/MethodLength
 
-  # find_by_id : String -> Plant
+  # find_by_id : String -> Plant|InventoryPlant
   # Returns a singular plant with the given `id`
-  def find_by_id(id)
-    result = search({ "id" => id }, limit: 1)
+  def find_by_id(id, inventory_id: nil)
+    result = search_all({ "plants.id" => id }, inventory_id: inventory_id, limit: 1)
 
     if result.empty?
       raise NoPlantFoundError.new, "No plant found with id #{id}."
@@ -59,13 +83,13 @@ class PlantsStorage < DBConnection
   private
   # Retrieves a conditions string & associated parameters for that string
   # Just use a manual approach
-  def filters_to_conditions(filters, first_placeholder: 3)
+  def filters_to_conditions(filters, first_placeholder)
     conditions = []
     condition_params = []
     n = first_placeholder
 
     filters.each do |filter, value|
-      if filter == 'id'
+      if filter == 'id' || filter == 'plants.id'
         conditions << "(#{filter} = $#{n})"
         condition_params.push(value.to_i)
         n += 1

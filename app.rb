@@ -37,12 +37,13 @@ ATTRIBUTES = {
 
 before do
   @users = Users.new(logger: logger)
-  @user = @users.find_by_id(session[:user_id])
-
+  @user = @users.find_by_id(session[:user_id]) if session.key?(:user_id)
   @plants_storage = PlantsStorage.new(logger: logger)
   @inventories = Inventories.new(logger: logger)
-  # Temporary: Inventory should load by name
-  @inventory = { "name" => "Test", "plants" => [] }
+  if @user
+    @user_inventory = @inventories.find(@user["id"])
+    @inventory_id = @user_inventory.id
+  end
 end
 
 PROTECTED_ROUTES = ['/inventory*', '/community*', '/settings']
@@ -129,13 +130,14 @@ get '/plants' do
   elsif !params.key?(:page)
     session[:error] = "No page was provided."
     erb :'forms/search'
-  elsif filters.values.all?(&:empty?)
-    session[:error] = "No filters were provided."
-    erb :'forms/search'
   else
     @page = set_page_number
     @pagination_pages = pagination_pages(@page)
-    erb(:'forms/search') + render_search_results(filters, page: @page)
+    @plants = @plants_storage.search_all(filters,
+                                         inventory_id: @inventory_id,
+                                         page: @page)
+
+    erb(:'forms/search') + erb(:'components/plants', layout: nil)
   end
 end
 
@@ -143,7 +145,7 @@ end
 
 get '/plants/:id' do
   begin
-    @plant = resolve_plant(params["id"])
+    @plant = @plants_storage.find_by_id(params["id"])
   rescue NoPlantFoundError => e
     session[:error] = e.message
     status 400
@@ -158,40 +160,50 @@ end
 get '/inventory' do
   redirect '/login' unless @user
 
-  @title = "Inventory"
+  @title = "Inventory: #{@user_inventory.name}"
   @subtitle = "Browse plants saved in your inventory."
-  @page = set_page_number
-  @pagination_pages = pagination_pages(@page)
+
+  filters = params.clone
+  filters.delete(:page)
 
   if !params.key?(:page)
     session[:error] = "No page was provided."
     erb :'forms/search'
-  elsif params.empty? || params.values.all?(&:empty?)
-    erb(:'forms/search') + render_inventory
   else
-    filters = params.clone
-    filters.delete(:page)
-    erb(:'forms/search') + render_inventory(filters: filters, page: @page)
+    @page = set_page_number
+    @pagination_pages = pagination_pages(@page)
+
+    @plants = @plants_storage.search_all(filters,
+      inventory_id: @inventory_id,
+      inventory_only: true,
+      page: @page)
+
+    erb(:'forms/search') + erb(:'components/plants', layout: nil)
   end
 end
 
 # [AJAX] Add a plant to a user's inventory
 post '/inventory' do
-  verify_uniqueness(params["id"]) do
+  verify_uniqueness(@inventory_id, params["id"]) do
     verify_quantity(params["quantity"]) do |quantity|
-      plant = { id: params["id"], quantity: quantity }
-      binding.pry
-      @inventory["plants"].unshift(plant)
+      plant_id = params["id"].to_i
+      quantity = params["quantity"].to_i
+      inventory_id = @inventory_id
+      @inventories.add_plant(plant_id, quantity, inventory_id)
+      status 204
     end
   end
 end
 
 # [AJAX] Update quantity of plant in inventory
 post '/inventory/:id/update' do
-  verify_in_inventory(params["id"]) do |_quantity|
+  verify_in_inventory(@inventory_id, params["id"]) do
     verify_quantity(params["quantity"]) do |quantity|
-      plant_to_update = search_inventory(params["id"])
-      plant_to_update[:quantity] = quantity
+      plant_id = params["id"].to_i
+      quantity = params["quantity"].to_i
+      inventory_id = @inventory_id
+      @inventories.update_plant_quantity(plant_id, quantity, inventory_id)
+      status 204
     end
   end
 end
@@ -199,11 +211,12 @@ end
 # [AJAX] Delete plant from inventory
 # Note: Simply disregards faulty ids
 post '/inventory/:id/delete' do
-  @inventory["plants"].delete_if do |plant|
-    plant[:id] == params["id"]
+  verify_in_inventory(@inventory_id, params["id"]) do
+    plant_id = params["id"].to_i
+    inventory_id = @inventory_id
+    @inventories.delete_plant(plant_id, inventory_id)
+    status 204
   end
-
-  status 204
 end
 
 # COMMUNITY

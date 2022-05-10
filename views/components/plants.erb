@@ -2,9 +2,9 @@
   <div class="row gy-3">
     <%== erb :'components/pagination', layout: nil, locals: { :page => @page } %>
   </div>
-  <% if @plants_storage.length > 0 %>
+  <% if @plants.length > 0 %>
     <div class="row gy-3">
-      <% @plants_storage.each do |plant| %>
+      <% @plants.each do |plant| %>
         <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
           <div class="card bg-light h-100">
             <a href="/plants/<%= plant.id %>" >
@@ -20,7 +20,7 @@
                 <img class="card-img" src="<%= plant.image_src %>" alt="Plant Image" />
               <% end %>
             </a>
-            <% if session.key?(:user) %>
+            <% if @user %>
               <div class="card-footer">
                 <%== erb(:'forms/quantity_form', layout: nil, locals: { plant: plant }) %>
               </div>
@@ -29,7 +29,7 @@
         </div>
       <% end %>
     </div>
-    <% if @plants_storage.length >= 4 %>
+    <% if @plants.length >= 4 %>
       <div class="my-3">
         <%== erb :'components/pagination', layout: nil, locals: { :page => @page } %>
       </div>

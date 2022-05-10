@@ -17,7 +17,7 @@ class Plant
   end
 
   def id
-    data["id"]
+    data["pid"]
   end
 
   def states
@@ -35,11 +35,9 @@ class Plant
 end
 
 class InventoryPlant < Plant
-  attr_reader :id, :quantity
+  attr_reader :quantity
 
-  def initialize(id, plants_storage, quantity: 0, data: nil)
-    data ||= plants_storage.find_by_id(id).data
-    @id = id
+  def initialize(data, quantity)
     super(data)
     @quantity = quantity
   end

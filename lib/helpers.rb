@@ -32,13 +32,6 @@ def file_path(file_name)
   "#{data_path}/#{file_name}"
 end
 
-def search_inventory(id)
-  return unless @user
-  @inventory["plants"].find do |plant|
-    plant[:id] == id
-  end
-end
-
 def protected!
   return if @user
   session[:error] = "You must be logged in to do that."
@@ -54,15 +47,14 @@ end
 def verify_quantity(quantity)
   if valid_quantity?(quantity)
     yield(quantity.to_i)
-    status 204
   else
     status 400
     "Quantity must be a non-negative integer."
   end
 end
 
-def verify_in_inventory(id)
-  if !search_inventory(id)
+def verify_in_inventory(inventory_id, plant_id)
+  if @plants_storage.search_inventory(inventory_id, { "plants.id" => plant_id }).empty?
     status 400
     "This plant is not in your inventory."
   else
@@ -70,8 +62,8 @@ def verify_in_inventory(id)
   end
 end
 
-def verify_uniqueness(id)
-  if !search_inventory(id)
+def verify_uniqueness(inventory_id, plant_id)
+  if @plants_storage.search_inventory(inventory_id, { "plants.id" => plant_id }).empty?
     yield
   else
     status 400
@@ -105,52 +97,4 @@ end
 def link_to_page(page_number)
   current_path = request.fullpath
   current_path.gsub(/page=\d+/, "page=#{page_number}")
-end
-
-# Search helpers
-
-def mix_in_inventory(plants)
-  plants.map do |plant|
-    inventory_plant = search_inventory(plant.id)
-    if inventory_plant
-      InventoryPlant.new(inventory_plant[:id],
-                         @plants_storage,
-                         quantity: inventory_plant[:quantity],
-                         data: plant.data)
-    else
-      plant
-    end
-  end
-end
-
-def render_search_results(filters, page: 1)
-  result = @plants_storage.search(filters, page: page)
-  @plants_storage = mix_in_inventory(result)
-
-  erb(:'components/plants', layout: nil)
-end
-
-def resolve_plant(id)
-  plant = search_inventory(id)
-
-  if plant
-    InventoryPlant.new(plant[:id], @plants_storage, quantity: plant[:quantity])
-  else
-    @plants_storage.find_by_id(id)
-  end
-end
-
-# Render the plants from the inventory using optional `filters`
-def render_inventory(filters: nil, page: 1)
-  @plants_storage = @inventory["plants"].map do |plant|
-    InventoryPlant.new(plant[:id], @plants_storage, quantity: plant[:quantity])
-  end
-
-  if filters
-    @plants_storage = @plants_storage.select do |plant|
-      @plants_storage.match?(plant.data, filters)
-    end
-  end
-
-  erb(:'components/plants', layout: nil)
 end
