@@ -11,7 +11,7 @@ require "rack/test"
 
 require_relative '../lib/plants_storage'
 
-require 'pry'
+require 'pry-byebug'
 
 class PlantsTest < MiniTest::Test
   def setup
@@ -20,12 +20,13 @@ class PlantsTest < MiniTest::Test
 
   # rubocop:disable Metrics/LineLength
   def test_common_name
-    assert_equal 1, @plants_storage.search({ "common_name" => "amethyst eryngo" }).size
-    assert_equal 1, @plants_storage.search({ "common_name" => "st Eryngo" }).size
+    result = @plants_storage.search_all({ "common_name" => "amethyst eryngo" })
+    assert_equal 1, result.size
+    assert_equal 1, @plants_storage.search_all({ "common_name" => "st Eryngo" }).size
   end
 
   def test_no_filters
-    assert_equal 0, @plants_storage.search({}).size
+    assert_equal PlantsStorage::PAGE_LIMIT, @plants_storage.search_all({}).size
   end
 
   def test_empty_filters
@@ -34,7 +35,7 @@ class PlantsTest < MiniTest::Test
       "scientific_name" => ""
     }
 
-    assert_equal 1, @plants_storage.search(filters).size
+    assert_equal 1, @plants_storage.search_all(filters).size
   end
 
   def test_multiple_filters
@@ -43,7 +44,7 @@ class PlantsTest < MiniTest::Test
       "scientific_name" => "Amethystinum"
     }
 
-    assert_equal 1, @plants_storage.search(filters).size
+    assert_equal 1, @plants_storage.search_all(filters).size
   end
 
   def test_invalid_filters
@@ -51,35 +52,63 @@ class PlantsTest < MiniTest::Test
       "CommonName" => " boxelder"
     }
 
-    assert_raises(StandardError) { @plants_storage.search(filters) }
+    assert_raises(StandardError) { @plants_storage.search_all(filters) }
   end
 
   def test_search_limit
     filters = { "genus" => "Acer" }
-    assert_equal PlantsStorage::PAGE_LIMIT, @plants_storage.search(filters).size
+    assert_equal PlantsStorage::PAGE_LIMIT, @plants_storage.search_all(filters).size
   end
 
   def test_multi_value_filter
     filters = { "common_name" => "am", "flower_color" => %w(pink orange) }
-    assert_equal 1, @plants_storage.search(filters).size
+    assert_equal 1, @plants_storage.search_all(filters).size
   end
 
   def test_range
     filters = { "precipitation_minimum" => "50, 60" }
-    assert_equal 5, @plants_storage.search(filters).size
+    assert_equal 5, @plants_storage.search_all(filters).size
   end
 
   def test_search_by_id
-    filters = { "id" => "10" }
-    assert_equal "alder", @plants_storage.search(filters)[0]["common_name"]
+    assert_equal "white fir", @plants_storage.find_by_id(3)["common_name"]
+    assert_equal true, @plants_storage.find_by_id(2, inventory_id: 1).is_a?(InventoryPlant)
+    assert_equal false, @plants_storage.find_by_id(100, inventory_id: 1).is_a?(InventoryPlant)
   end
 
   def test_pagination
     filters = { "genus" => "Acer" }
-    assert_equal PlantsStorage::PAGE_LIMIT, @plants_storage.search(filters, page: 2).size
+    assert_equal PlantsStorage::PAGE_LIMIT, @plants_storage.search_all(filters, page: 2).size
 
     filters = { "genus" => "Acer" }
-    assert_equal 0, @plants_storage.search(filters, page: 5).size
+    assert_equal 0, @plants_storage.search_all(filters, page: 5).size
+  end
+
+  def test_search_all_inventory
+    # Without filters
+    assert_equal PlantsStorage::PAGE_LIMIT,
+    @plants_storage.search_all(inventory_id: 1).size
+    # With filters
+
+    filters = { "scientific_name" => "abies" }
+
+    result = @plants_storage.search_all(filters, inventory_id: 1, inventory_only: true)
+    assert_equal 3, result.size
+
+    # With filters
+
+    filters = { "scientific_name" => "abies" }
+
+    result = @plants_storage.search_inventory(1, filters)
+    assert_equal 3, result.size
+  end
+
+  def test_search_with_inventory
+    filters = { "foliage_color" => ["Green"] }
+
+    results = @plants_storage.search_all(filters, inventory_id: 1)
+    assert_equal PlantsStorage::PAGE_LIMIT, results.size
+    assert_equal 4, results.select { |plant| plant.is_a? InventoryPlant }.size
   end
   # rubocop:enable Metrics/LineLength
 end
