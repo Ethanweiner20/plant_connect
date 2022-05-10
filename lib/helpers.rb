@@ -33,9 +33,16 @@ def file_path(file_name)
 end
 
 def protected!
-  return if @user
+  if @user
+    session.delete(:next_path)
+    return
+  end
+  
   session[:error] = "You must be logged in to do that."
-  redirect '/login' unless @user
+
+  # Store the requested path
+  session[:next_path] = request.fullpath
+  redirect "/login" unless @user
 end
 
 # Input Validation

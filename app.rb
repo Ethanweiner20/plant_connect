@@ -36,6 +36,7 @@ ATTRIBUTES = {
 # FILTERS
 
 before do
+  # session.delete(:next_path)
   @users = Users.new(logger: logger)
   @user = @users.find_by_id(session[:user_id]) if session.key?(:user_id)
   @plants_storage = PlantsStorage.new(logger: logger)
@@ -85,7 +86,7 @@ post '/login' do
   begin
     user_id = @users.authenticate(username, password)
     session[:user_id] = user_id
-    redirect '/inventory?page=1'
+    redirect session[:next_path]
   rescue InvalidLoginCredentialsError => e
     session[:error] = e.message
     @username = username
