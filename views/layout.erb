@@ -65,8 +65,12 @@
               <input class="form-control me-2" name="common_name" type="search" placeholder="Plant Name" aria-label="Search" />
               <button class="btn btn-outline-success me-2" type="submit">Search</button>
             </form>
-            <% unless session.key?(:user) %>
-              <a href="/login" class="mb-1 btn btn-outline-primary">Log In</a>
+            <% if @user %>
+              <form action="/logout" method="post">
+                <button type="submit" class="mb-1 btn btn-outline-danger">Logout</button>
+              </form>
+            <% else %>
+              <a href="/login" class="mb-1 btn btn-outline-primary">Login</a>
             <% end %>
           </div>
         </div>

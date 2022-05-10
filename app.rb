@@ -66,12 +66,12 @@ def logout
   session.delete(:user_id)
 end
 
-# Login
-
 post '/logout' do
   logout
   redirect '/login'
 end
+
+# Login
 
 get '/login' do
   logout
@@ -133,11 +133,16 @@ get '/plants' do
   else
     @page = set_page_number
     @pagination_pages = pagination_pages(@page)
-    @plants = @plants_storage.search_all(filters,
+    begin
+      @plants = @plants_storage.search_all(filters,
                                          inventory_id: @inventory_id,
                                          page: @page)
-
-    erb(:'forms/search') + erb(:'components/plants', layout: nil)
+      erb(:'forms/search') + erb(:'components/plants', layout: nil)
+    rescue PG::UndefinedColumn
+      session[:error] = "You provided a filter that doesn't exist. "\
+                        "Only use the provided filters for searching."
+      erb(:'forms/search')
+    end
   end
 end
 
@@ -173,12 +178,17 @@ get '/inventory' do
     @page = set_page_number
     @pagination_pages = pagination_pages(@page)
 
-    @plants = @plants_storage.search_all(filters,
-      inventory_id: @inventory_id,
-      inventory_only: true,
-      page: @page)
-
-    erb(:'forms/search') + erb(:'components/plants', layout: nil)
+    begin
+      @plants = @plants_storage.search_all(filters,
+        inventory_id: @inventory_id,
+        inventory_only: true,
+        page: @page)
+      erb(:'forms/search') + erb(:'components/plants', layout: nil)
+    rescue PG::UndefinedColumn
+      session[:error] = "You provided a filter that doesn't exist. "\
+                        "Only use the provided filters for searching."
+      erb(:'forms/search')
+    end
   end
 end
 
