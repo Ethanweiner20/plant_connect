@@ -47,6 +47,10 @@ before do
   end
 end
 
+after do
+  [@users, @plants_storage, @inventories].each(&:close_connection)
+end
+
 PROTECTED_ROUTES = ['/inventory*', '/community*', '/settings']
 
 PROTECTED_ROUTES.each do |route|

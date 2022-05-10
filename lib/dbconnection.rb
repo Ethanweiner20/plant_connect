@@ -8,4 +8,9 @@ class DBConnection
     @logger.info("#{sql}: #{params}") if @logger
     @db.exec_params(sql, params)
   end
+
+  def close_connection
+    @db.finish
+    @logger.info "Database connection closed."
+  end
 end
