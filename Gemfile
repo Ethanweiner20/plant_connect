@@ -14,6 +14,7 @@ gem "webrick"
 gem "rubocop", '0.86.0'
 gem "pg"
 gem "pry"
+gem "pry-byebug"
 
 group :production do
   gem "puma"
