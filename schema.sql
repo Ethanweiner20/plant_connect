@@ -55,3 +55,5 @@ CREATE TABLE inventories_plants
 
 ALTER TABLE plants
 ADD FOREIGN KEY (created_by) REFERENCES users(id);
+
+ALTER TABLE inventories_plants ADD UNIQUE(inventory_id, plant_id);
