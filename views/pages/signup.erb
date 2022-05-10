@@ -9,7 +9,7 @@
       <div class="mb-3">
         <label for="password">Password</label>
         <p class="text-muted sub-info">Must contain at least 8 characters, a number, and uppercase letter</p>
-        <input type="password" name="password" id="password" class="form-control" />
+        <input type="password" name="password" id="password" class="form-control" pattern="\S{8,}"  />
       </div>
       <button type="submit" class="btn btn-primary">Sign Up</button>
     </form>
