@@ -5,7 +5,7 @@ class DBConnection
   end
 
   def query(sql, params)
-    @logger.info(sql) if @logger
+    @logger.info("#{sql}: #{params}") if @logger
     @db.exec_params(sql, params)
   end
 end
