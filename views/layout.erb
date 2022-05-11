@@ -71,6 +71,11 @@
         </div>
       </nav>
       <div class="d-flex justify-content-end">
+        <% if session.key?(:error) %>
+          <div class="alert flex-fill mx-auto my-0 alert-danger" role="alert">
+            <%= session.delete(:error) %>
+          </div>
+        <% end %>
         <div class="bg-light rounded px-3 py-2 border">
           <% if @user %>
             <span class="text-muted auth-status">
@@ -90,11 +95,6 @@
     </header>
     <%# Content %>
     <main>
-      <% if session.key?(:error) %>
-        <div class="alert alert-danger" role="alert">
-          <%= session.delete(:error) %>
-        </div>
-      <% end %>
       <% if @title %>
         <div class="mt-3 mb-3 text-center">
           <p class="h2 text-dark">
