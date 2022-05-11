@@ -76,7 +76,7 @@ end
 
 get '/login' do
   logout
-  erb :'pages/login'
+  erb :login
 end
 
 post '/login' do
@@ -90,7 +90,7 @@ post '/login' do
   rescue InvalidLoginCredentialsError => e
     session[:error] = e.message
     @username = username
-    erb :'pages/login'
+    erb :login
   end
 end
 
@@ -98,7 +98,7 @@ end
 
 get '/signup' do
   logout
-  erb :'pages/signup'
+  erb :signup
 end
 
 post '/users' do
@@ -112,7 +112,7 @@ post '/users' do
   rescue InsecurePasswordError, NonUniqueUsernameError => e
     session[:error] = e.message
     @username = username
-    erb :'pages/signup'
+    erb :signup
   end
 end
 
@@ -135,7 +135,7 @@ get '/plants' do
     @plants = @plants_storage.search_all(filters,
                                         inventory_id: @user_inventory_id,
                                         page: @page)
-    erb :'pages/plants'
+    erb :plants
   rescue PG::UndefinedColumn
     session[:error] = "You provided a filter that doesn't exist. "\
                       "Only use the provided filters for searching."
@@ -153,7 +153,7 @@ get '/plants/:id' do
     status 400
   end
 
-  erb :'pages/plant'
+  erb :plant
 end
 
 # INVENTORY
@@ -193,7 +193,7 @@ get '/inventories/:inventory_id' do
       inventory_id: @inventory.id,
       inventory_only: true,
       page: @page)
-    erb :'pages/plants'
+    erb :plants
   rescue PG::UndefinedColumn
     session[:error] = "You provided a filter that doesn't exist. "\
                       "Only use the provided filters for searching."
@@ -249,12 +249,12 @@ get '/community' do
                end
   plant_id = params["plant_id"].to_i
   @inventories_list = @inventories.search_all(inventory_name, owner_name, min_plants, plant_id)
-  erb :'pages/community'
+  erb :community
 end
 
 # SETTINGS
 
 get '/settings' do
   @title = "Settings"
-  erb :'pages/settings'
+  erb :settings
 end
