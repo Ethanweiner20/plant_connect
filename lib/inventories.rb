@@ -2,6 +2,38 @@ require_relative 'dbconnection'
 require_relative 'inventory'
 
 class Inventories < DBConnection
+  PAGE_LIMIT = 50
+
+  def search_all(inventory_name, owner_name, min_plants, plant_id)
+    if plant_id > 0
+      plant_id_clause = <<~SQL
+                        AND $4 IN (SELECT plant_id FROM inventories_plants
+                        WHERE inventory_id = inventories.id)
+                        SQL
+    end
+
+                        
+    sql = <<~SQL
+          SELECT inventories.*,
+                 count(plant_id) AS num_species,
+                 sum(quantity) AS total_quantity,
+                 users.username
+          FROM inventories
+            LEFT OUTER JOIN inventories_plants
+            ON inventories.id = inventories_plants.inventory_id
+            INNER JOIN users
+            ON inventories.user_id = users.id
+            WHERE inventories.name ~* $1 AND users.username ~* $2
+          GROUP BY inventories.id, users.username
+          HAVING count(plant_id) >= $3#{plant_id_clause}
+          ORDER BY inventories.created_on DESC;
+          SQL
+
+    result = query(sql, [inventory_name, owner_name, min_plants] + (plant_id > 0 ? [plant_id] : []))
+
+    result.map { |tuple| Inventory.new(tuple) }
+  end
+
   def find_by_user_id(user_id)
     sql = <<~SQL
           SELECT * FROM inventories 

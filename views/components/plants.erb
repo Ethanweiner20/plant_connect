@@ -18,6 +18,11 @@
                   <%= plant["scientific_name"] %>
                 </h6>
                 <%== erb :'components/plant_metadata', layout: nil, locals: { :plant => plant } %>
+                <form action="/community" method="get">
+                  <input type="hidden" name="plant_id" value="<%= plant.id %>"/>
+                  <input type="hidden" name="page" value="1"/>
+                  <button type="submit" class="btn btn-link text-start p-0">Search for inventories with this plant.</button>
+                </form>
               </div>
             </a>
             <div class="card-footer">

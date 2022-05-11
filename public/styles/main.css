@@ -55,3 +55,11 @@ select[multiple] {
 .sub-info {
   font-size: 0.8em;
 }
+
+.inventories-list {
+  max-width: 800px;
+}
+
+.btn-link {
+  font-size: 0.9rem;
+}
