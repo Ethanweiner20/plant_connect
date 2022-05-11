@@ -25,7 +25,7 @@ end
 # ROUTE HELPERS
 
 def append_page(path)
-  path.include?('?') ? path + '&page=1' : path + '?page=1'
+  "#{path}#{path.include?('?') ? '&page=1' : '?page=1'}"
 end
 
 def data_path
@@ -41,12 +41,23 @@ def protected!
     session.delete(:next_path)
     return
   end
-  
+
   session[:error] = "You must be logged in to do that."
 
   # Store the requested path
   session[:next_path] = request.fullpath
   redirect "/login" unless @user
+end
+
+def extract_filters(params)
+  filters = params.clone
+  filters.delete(:page)
+  filters.delete(:inventory_id)
+  filters
+end
+
+def logout
+  session.delete(:user_id)
 end
 
 # Input Validation
@@ -84,7 +95,7 @@ end
 
 # Pagination helpers
 
-def set_page_number(page_string)
+def retrieve_page_number(page_string)
   if valid_page?(page_string)
     page_string.to_i
   else

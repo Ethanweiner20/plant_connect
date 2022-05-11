@@ -4,6 +4,7 @@ require_relative 'inventory'
 class Inventories < DBConnection
   PAGE_LIMIT = 50
 
+  # rubocop:disable Metrics/MethodLength
   def search_all(inventory_name, owner_name, min_plants, plant_id)
     if plant_id > 0
       plant_id_clause = <<~SQL
@@ -12,7 +13,6 @@ class Inventories < DBConnection
                         SQL
     end
 
-                        
     sql = <<~SQL
           SELECT inventories.*,
                  count(plant_id) AS num_species,
@@ -29,14 +29,17 @@ class Inventories < DBConnection
           ORDER BY inventories.created_on DESC;
           SQL
 
-    result = query(sql, [inventory_name, owner_name, min_plants] + (plant_id > 0 ? [plant_id] : []))
+    result = query(sql,
+                   [inventory_name, owner_name,
+                    min_plants] + (plant_id > 0 ? [plant_id] : []))
 
     result.map { |tuple| Inventory.new(tuple) }
   end
+  # rubocop:enable Metrics/MethodLength
 
   def find_by_user_id(user_id)
     sql = <<~SQL
-          SELECT * FROM inventories 
+          SELECT * FROM inventories#{' '}
           WHERE user_id = $1
           LIMIT 1
           SQL
@@ -49,7 +52,7 @@ class Inventories < DBConnection
 
   def find_by_id(id)
     sql = <<~SQL
-          SELECT * FROM inventories 
+          SELECT * FROM inventories#{' '}
           WHERE id = $1
           LIMIT 1
           SQL
@@ -61,7 +64,12 @@ class Inventories < DBConnection
   end
 
   def add(user_id, name, is_public: false)
-    sql = 'INSERT INTO inventories (name, user_id, is_public) VALUES ($1, $2, $3)'
+    sql = <<~SQL
+          INSERT INTO inventories
+            (name, user_id, is_public)
+          VALUES
+            ($1, $2, $3)
+          SQL
     query(sql, [name, user_id, is_public])
   end
 

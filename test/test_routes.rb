@@ -157,19 +157,19 @@ class BloomShareTest < MiniTest::Test
   end
 
   def test_inventory_no_filters
-    get '/inventories/user?page=1', {}, @user_session
+    get '/inventories/user', {}, @user_session
     assert_equal 200, last_response.status
     assert_includes last_response.body, "Balsam fir"
     assert_includes last_response.body, "New Amount"
   end
 
   def test_inventory_with_filters
-    get '/inventories/user?page=1', { "common_name" => "Balsam" }, @user_session
+    get '/inventories/user', { "common_name" => "Balsam" }, @user_session
     assert_equal 200, last_response.status
     assert_includes last_response.body, "Balsam fir"
     assert_includes last_response.body, "New Amount"
 
-    get '/inventories/user?page=1', { "common_name" => "1234" }, @user_session
+    get '/inventories/user', { "common_name" => "1234" }, @user_session
     assert_equal 200, last_response.status
     assert_includes last_response.body, "No plants found."
   end

@@ -3,18 +3,18 @@ require 'sinatra/base'
 class DBConnection
   def initialize(logger: nil)
     @db = if Sinatra::Base.production?
-      PG.connect(ENV['DATABASE_URL'])
-    elsif Sinatra::Base.test?
-      PG.connect(dbname: 'bloomshare-test')
-    else
-      PG.connect(dbname: 'bloomshare')
-    end
+            PG.connect(ENV['DATABASE_URL'])
+          elsif Sinatra::Base.test?
+            PG.connect(dbname: 'bloomshare-test')
+          else
+            PG.connect(dbname: 'bloomshare')
+          end
 
     @logger = logger
   end
 
   def query(sql, params)
-    @logger.info("#{sql}: #{params}") if @logger
+    @logger&.info("#{sql}: #{params}")
     @db.exec_params(sql, params)
   end
 

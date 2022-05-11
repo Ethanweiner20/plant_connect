@@ -63,30 +63,26 @@ end
 
 # AUTHENTICATION
 
-def logout
-  session.delete(:user_id)
-end
-
+# Logout
 post '/logout' do
   logout
   redirect '/login'
 end
 
-# Login
-
+# Render the login page
 get '/login' do
   logout
   erb :login
 end
 
+# Login
 post '/login' do
   username = params[:username]
   password = params[:password]
 
   begin
-    user_id = @users.authenticate(username, password)
-    session[:user_id] = user_id
-    redirect session[:next_path] ? session[:next_path] : '/inventories/user?page=1'
+    session[:user_id] = @users.authenticate(username, password)
+    redirect session[:next_path] || '/inventories/user'
   rescue InvalidLoginCredentialsError => e
     session[:error] = e.message
     @username = username
@@ -94,21 +90,20 @@ post '/login' do
   end
 end
 
-# Signup
-
+# Render signup page
 get '/signup' do
   logout
   erb :signup
 end
 
+# Register user
 post '/users' do
   username = params[:username]
   password = params[:password]
 
   begin
-    user_id = @users.create(username, password, @inventories)
-    session[:user_id] = user_id
-    redirect '/inventories/user?page=1'
+    session[:user_id] = @users.create(username, password, @inventories)
+    redirect '/inventories/user'
   rescue InsecurePasswordError, NonUniqueUsernameError => e
     session[:error] = e.message
     @username = username
@@ -123,18 +118,17 @@ get '/plants' do
   @title = "Search"
   @subtitle = "Search thousands of plants using any number of filters."
 
-  filters = params.clone
-  filters.delete(:page)
+  filters = extract_filters(params)
 
   return redirect append_page(request.fullpath) unless params.key?(:page)
 
-  @page = set_page_number(params[:page])
+  @page = retrieve_page_number(params[:page])
   @pagination_pages = pagination_pages(@page)
 
   begin
     @plants_list = @plants.search_all(filters,
-                                        inventory_id: @user_inventory_id,
-                                        page: @page)
+                                      inventory_id: @user_inventory_id,
+                                      page: @page)
     erb :plants
   rescue PG::UndefinedColumn
     session[:error] = "You provided a filter that doesn't exist. "\
@@ -145,6 +139,7 @@ end
 
 # VIEW SINGULAR PLANTS
 
+# Render a singular plant with the given `id`
 get '/plants/:id' do
   begin
     @plant = @plants.find_by_id(params["id"], inventory_id: @user_inventory_id)
@@ -158,41 +153,41 @@ end
 
 # INVENTORY
 
-def set_inventory(id)
-  id == 'user' ? @user_inventory : @inventories.find_by_id(id)
-end
-
-# Manage inventory
+# Render an inventory with the given `inventory_id`
+# rubocop:disable Metrics/BlockLength
 get '/inventories/:inventory_id' do
   inventory_id = params['inventory_id']
-  @inventory = set_inventory(inventory_id)
+  @inventory = if inventory_id == 'user'
+                 @user_inventory
+               else
+                 @inventories.find_by_id(inventory_id)
+               end
 
   unless @inventory
-    session[:error] = "No public inventory with the id '#{inventory_id}' exists."
+    session[:error] =
+      "No public inventory with the id '#{inventory_id}' exists."
     redirect '/community'
   end
 
   if @inventory.id == @user_inventory_id
     @title = "Your Inventory"
-    @subtitle = "Browse plants saved in your inventory." 
+    @subtitle = "Browse plants saved in your inventory."
   else
     @title = "Inventory: #{@inventory.name}"
   end
 
-  filters = params.clone
-  filters.delete(:page)
-  filters.delete(:inventory_id)
+  filters = extract_filters(params)
 
   return redirect append_page(request.fullpath) unless params.key?(:page)
 
-  @page = set_page_number(params[:page])
+  @page = retrieve_page_number(params[:page])
   @pagination_pages = pagination_pages(@page)
 
   begin
     @plants_list = @plants.search_all(filters,
-      inventory_id: @inventory.id,
-      inventory_only: true,
-      page: @page)
+                                      inventory_id: @inventory.id,
+                                      inventory_only: true,
+                                      page: @page)
     erb :plants
   rescue PG::UndefinedColumn
     session[:error] = "You provided a filter that doesn't exist. "\
@@ -200,13 +195,13 @@ get '/inventories/:inventory_id' do
     erb :'forms/search'
   end
 end
+# rubocop:enable Metrics/BlockLength
 
-# [AJAX] Add a plant to a user's inventory
+# Add a plant to a user's inventory
 post '/inventories/user' do
   verify_uniqueness(@user_inventory_id, params["plant_id"]) do
     verify_quantity(params["quantity"]) do |quantity|
       plant_id = params["plant_id"].to_i
-      quantity = params["quantity"].to_i
       inventory_id = @user_inventory_id
       @inventories.add_plant(plant_id, quantity, inventory_id)
       status 204
@@ -214,20 +209,18 @@ post '/inventories/user' do
   end
 end
 
-# [AJAX] Update quantity of plant in inventory
+# Update quantity of plant in inventory
 post '/inventories/user/:plant_id/update' do
   verify_in_inventory(@user_inventory_id, params["plant_id"]) do
     verify_quantity(params["quantity"]) do |quantity|
       plant_id = params["plant_id"].to_i
-      quantity = params["quantity"].to_i
       @inventories.update_plant_quantity(plant_id, quantity, @user_inventory_id)
       status 204
     end
   end
 end
 
-# [AJAX] Delete plant from inventory
-# Note: Simply disregards faulty ids
+# Delete plant from inventory (disregards faulty ids)
 post '/inventories/user/:plant_id/delete' do
   verify_in_inventory(@user_inventory_id, params["plant_id"]) do
     plant_id = params["plant_id"].to_i
@@ -238,22 +231,25 @@ end
 
 # COMMUNITY
 
+# Render a list of public inventories from the community
 get '/community' do
   @title = "Community"
-  inventory_name = params["inventory_name"] ? params["inventory_name"] : ''
-  owner_name = params["owner_name"] ? params["owner_name"] : ''
+  inventory_name = params["inventory_name"] || ''
+  owner_name = params["owner_name"] || ''
   min_plants = if params["min_plants"] == '' || !params["min_plants"]
                  1
                else
                  params["min_plants"].to_i
                end
   plant_id = params["plant_id"].to_i
-  @inventories_list = @inventories.search_all(inventory_name, owner_name, min_plants, plant_id)
+  @inventories_list = @inventories.search_all(inventory_name, owner_name,
+                                              min_plants, plant_id)
   erb :community
 end
 
 # SETTINGS
 
+# Render the settings page
 get '/settings' do
   @title = "Settings"
   erb :settings

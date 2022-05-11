@@ -15,23 +15,24 @@ class Plants < DBConnection
                          precipitation_maximum
                          temperature_minimum)
 
-
   # search : Hash of Filters, Integer -> List of Plants
   # Returns a list of `PAGE_LIMIT` plants starting at a given offset
   # Only includes public plants or plants created by the current user
   # rubocop:disable Metrics/MethodLength
-  def search_all(filters = {}, inventory_id: nil, limit: PAGE_LIMIT, page: 1, inventory_only: false)
+  def search_all(filters = {}, inventory_id: nil, limit: PAGE_LIMIT, page: 1,
+                 inventory_only: false)
     # Note: Add functionality to include user-specific plants to result
     filters = filters.reject do |_, value|
       !value || value == ''
     end
 
     offset = compute_offset(page)
-    result = perform_search_query(filters, offset, limit, inventory_id, inventory_only)
+    result = perform_search_query(filters, offset, limit, inventory_id,
+                                  inventory_only)
 
-    # Transform tuples to Plants or InventoryPlants, dependent on whether a quantity exists
+    # Transform tuples to plants
     result.map do |tuple|
-      if (tuple["inventory_id"])
+      if tuple["inventory_id"]
         InventoryPlant.new(tuple, tuple["quantity"].to_i)
       else
         Plant.new(tuple)
@@ -49,7 +50,8 @@ class Plants < DBConnection
   # find_by_id : String -> Plant|InventoryPlant
   # Returns a singular plant with the given `id`
   def find_by_id(id, inventory_id: nil)
-    result = search_all({ "plants.id" => id }, inventory_id: inventory_id, limit: 1)
+    result = search_all({ "plants.id" => id }, inventory_id: inventory_id,
+                                               limit: 1)
 
     if result.empty?
       raise NoPlantFoundError.new, "No plant found with id #{id}."
@@ -60,6 +62,7 @@ class Plants < DBConnection
 
   private
 
+  # rubocop: disable Metrics/MethodLength, Metrics/AbcSize, Metrics/BlockLength
   def perform_search_query(filters, offset, limit, inventory_id, inventory_only)
     if inventory_only # Search inventory only
       conditions, params = filters_to_conditions(filters, 4)
@@ -69,13 +72,13 @@ class Plants < DBConnection
       FROM plants
         INNER JOIN inventories_plants
         ON plants.id = inventories_plants.plant_id
-        WHERE inventory_id = $3 #{conditions.length > 0 ? 'AND' : ''} #{conditions}
+        WHERE inventory_id = $3 #{!conditions.empty? ? 'AND' : ''} #{conditions}
       ORDER BY scientific_name
       LIMIT $1
       OFFSET $2;
       SQL
 
-      result = query(sql, [limit, offset, inventory_id] + params)
+      query(sql, [limit, offset, inventory_id] + params)
     elsif inventory_id # Search all with inventory mixed in
       conditions, params = filters_to_conditions(filters, 4)
 
@@ -85,26 +88,26 @@ class Plants < DBConnection
         LEFT OUTER JOIN
         (SELECT * FROM inventories_plants WHERE inventory_id = $3) AS inventory_plants
         ON plants.id = inventory_plants.plant_id
-        #{conditions.length > 0 ? 'WHERE' : ''} #{conditions} 
+        #{!conditions.empty? ? 'WHERE' : ''} #{conditions}#{' '}
       ORDER BY scientific_name
       LIMIT $1
       OFFSET $2;
       SQL
 
-      result = query(sql, [limit, offset, inventory_id] + params)
+      query(sql, [limit, offset, inventory_id] + params)
     else # Search all
       conditions, params = filters_to_conditions(filters, 3)
 
       sql = <<~SQL
       SELECT plants.id AS pid, *
       FROM plants
-      #{conditions.length > 0 ? 'WHERE' : ''} #{conditions} 
+      #{!conditions.empty? ? 'WHERE' : ''} #{conditions}#{' '}
       ORDER BY scientific_name
       LIMIT $1
       OFFSET $2;
       SQL
 
-      result = query(sql, [limit, offset] + params)
+      query(sql, [limit, offset] + params)
     end
   end
 
@@ -139,9 +142,10 @@ class Plants < DBConnection
         n += 1
       end
     end
-    
+
     [conditions.join(' AND '), condition_params]
   end
+  # rubocop: enable Metrics/MethodLength, Metrics/AbcSize, Metrics/BlockLength
 
   def compute_offset(page_number)
     (page_number - 1) * PAGE_LIMIT

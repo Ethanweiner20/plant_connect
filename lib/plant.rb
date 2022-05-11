@@ -1,4 +1,3 @@
-# Stores the data for a given plant
 require_relative 'image_search'
 require_relative 'plants'
 

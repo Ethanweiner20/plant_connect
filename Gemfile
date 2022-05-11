@@ -5,16 +5,16 @@ gem "bcrypt"
 gem "erubis"
 gem "minitest"
 gem "minitest-reporters"
+gem "pg"
+gem "pry"
+gem "pry-byebug"
 gem "rack-test"
 gem "rake"
+gem "rubocop"
 gem 'simplecov', require: false, group: :test
 gem "sinatra"
 gem "sinatra-contrib"
 gem "webrick"
-gem "rubocop", '0.86.0'
-gem "pg"
-gem "pry"
-gem "pry-byebug"
 
 group :production do
   gem "puma"

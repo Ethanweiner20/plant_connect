@@ -1,4 +1,4 @@
-require_relative 'inventories.rb'
+require_relative 'inventories'
 
 class Inventory
   attr_reader :name, :id, :num_species, :total_quantity, :username

@@ -36,22 +36,20 @@ class Users < DBConnection
     result[0]
   end
 
-  # Authentication: Returns a user id if the user can be found
+  # Authentication: Returns a user id if properly authenticated
   def authenticate(username, password)
     candidate_user = find_by_username(username)
-    raise InvalidLoginCredentialsError unless candidate_user
-
-    # Verify password hashes match in order to return the found user
-    if BCrypt::Password.new(candidate_user["password_hash"]) == password
-      candidate_user["id"]
-    else
+    unless candidate_user &&
+           BCrypt::Password.new(candidate_user["password_hash"]) == password
       raise InvalidLoginCredentialsError
     end
+
+    candidate_user["id"]
   end
 
   def create(username, password, inventories)
-    raise InsecurePasswordError.new unless strong_password?(password)
-    raise NonUniqueUsernameError.new(username) if find_by_username(username)
+    raise InsecurePasswordError unless strong_password?(password)
+    raise NonUniqueUsernameError, username if find_by_username(username)
 
     uuid = SecureRandom.uuid
     password_hash = BCrypt::Password.create(password)
