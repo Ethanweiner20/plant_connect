@@ -1,6 +1,13 @@
 class DBConnection
   def initialize(logger: nil)
-    @db = PG.connect(dbname: 'bloomshare') # Configure for production
+    @db = if Sinatra::Base.production?
+      PG.connect(ENV['DATABASE_URL'])
+    elsif Sinatra::Base.test?
+      PG.connect(dbname: 'bloomshare-test')
+    else
+      PG.connect(dbname: 'bloomshare')
+    end
+
     @logger = logger
   end
 
