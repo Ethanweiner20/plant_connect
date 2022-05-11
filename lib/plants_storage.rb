@@ -54,7 +54,7 @@ class PlantsStorage < DBConnection
       sql = <<~SQL
       SELECT plants.id AS pid, *
       FROM plants
-      WHERE #{conditions} 
+      #{conditions.length > 0 ? 'WHERE' : ''} #{conditions} 
       ORDER BY scientific_name
       LIMIT $1
       OFFSET $2;
