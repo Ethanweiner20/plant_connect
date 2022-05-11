@@ -30,11 +30,19 @@ ALTER TABLE inventories_id_seq;
 
 ALTER SEQUENCE inventories_id_seq OWNED BY inventories.id;
 
+<<<<<<< HEAD
 
 --
 -- Name: inventories_plants; Type: TABLE; Schema: public; Owner: ethanweiner
 --
 
+=======
+
+--
+-- Name: inventories_plants; Type: TABLE; Schema: public; Owner: ethanweiner
+--
+
+>>>>>>> 7703954647c1c2334e93c7fe1deffae9a5b3de36
 CREATE TABLE inventories_plants (
     id integer NOT NULL,
     inventory_id integer,
