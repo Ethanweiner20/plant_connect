@@ -30,19 +30,10 @@ ALTER TABLE inventories_id_seq;
 
 ALTER SEQUENCE inventories_id_seq OWNED BY inventories.id;
 
-<<<<<<< HEAD
-
 --
 -- Name: inventories_plants; Type: TABLE; Schema: public; Owner: ethanweiner
 --
 
-=======
-
---
--- Name: inventories_plants; Type: TABLE; Schema: public; Owner: ethanweiner
---
-
->>>>>>> 7703954647c1c2334e93c7fe1deffae9a5b3de36
 CREATE TABLE inventories_plants (
     id integer NOT NULL,
     inventory_id integer,
@@ -357,8 +348,5 @@ ALTER TABLE ONLY plants
 --
 
 -- Copy data into plants database
-COPY plants (id, species_id, genus, species, scientific_name, common_name, notes, created_at, updated_at, accepted_symbol, synonym_symbol, symbol, plant_floristic_area, state, category, family, family_symbol, family_common_name, "order", sub_class, class, sub_division, division, super_division, sub_kingdom, kingdom, ITIS_TSN, duration, growth_habit, native_status, federal_noxious_status, federal_noxious_common_name, state_noxious_status, state_noxious_common_name, invasive, federal_te_status, state_te_status, state_te_common_name, national_wetland_indicator_status, regional_wetland_indicator_status, active_growth_period, after_harvest_regrowth_rate, bloat, c2n_ratio, coppice_potential, fall_conspicuous, fire_resistance, flower_color, flower_conspicuous, foliage_color, foliage_porosity_summer, foliage_porosity_winter, foliage_texture, fruit_color, fruit_conspicuous, growth_form, growth_rate, max_height_20yrs, mature_height, known_allelopath, leaf_retention, lifespane, low_growing_grass, nitrogen_fixation, resprout_ability, shape_and_orientation, toxicity, adapted_coarse_soils, adapted_medium_soils, adapted_fine_soils, anaeroboic_tolerance, caco3_tolerance, cold_stratification, drought_tolerance, fertility_requirement, fire_tolerance, min_frost_free_days, hedge_tolerance, moisture_user, ph_minimum, ph_maximum, min_planting_density, max_planting_density, precipitation_minimum, precipitation_maximum, root_depth_minimum, salinity_tolerance, shade_tolerance, temperature_minimum, bloom_period, commercial_availability, fruit_seed_abundance, fruit_seed_period_begin, fruit_seed_period_end, fruit_seed_persistence, propogated_by_bare_root, propogated_by_bulbs, propogated_by_container, propogated_by_corms, propogated_by_cuttings, propogated_by_seed, propogated_by_sod, propogated_by_sprigs, propogated_by_tubers, seeds_per_pound, seed_spread_rate, seedling_vigor, small_grain, vegetative_spread_rate, berry_nut_seed_product, christmas_tree_product, fodder_product, fuelwood_product, lumber_product, naval_store_product, nursery_stock_product, palatable_browse_animal, palatable_graze_animal, palatable_human, post_product, protein_potential, pulpwood_product, veneer_product)
-FROM '/Users/ethanweiner/Documents/Launch_School/RB185/plant_connect/data/plants_dbimport.csv'
-(format csv, header true, null 'NA')
-WHERE state LIKE '%MA%';
+\copy plants (id, species_id, genus, species, scientific_name, common_name, notes, created_at, updated_at, accepted_symbol, synonym_symbol, symbol, plant_floristic_area, state, category, family, family_symbol, family_common_name, "order", sub_class, class, sub_division, division, super_division, sub_kingdom, kingdom, ITIS_TSN, duration, growth_habit, native_status, federal_noxious_status, federal_noxious_common_name, state_noxious_status, state_noxious_common_name, invasive, federal_te_status, state_te_status, state_te_common_name, national_wetland_indicator_status, regional_wetland_indicator_status, active_growth_period, after_harvest_regrowth_rate, bloat, c2n_ratio, coppice_potential, fall_conspicuous, fire_resistance, flower_color, flower_conspicuous, foliage_color, foliage_porosity_summer, foliage_porosity_winter, foliage_texture, fruit_color, fruit_conspicuous, growth_form, growth_rate, max_height_20yrs, mature_height, known_allelopath, leaf_retention, lifespane, low_growing_grass, nitrogen_fixation, resprout_ability, shape_and_orientation, toxicity, adapted_coarse_soils, adapted_medium_soils, adapted_fine_soils, anaeroboic_tolerance, caco3_tolerance, cold_stratification, drought_tolerance, fertility_requirement, fire_tolerance, min_frost_free_days, hedge_tolerance, moisture_user, ph_minimum, ph_maximum, min_planting_density, max_planting_density, precipitation_minimum, precipitation_maximum, root_depth_minimum, salinity_tolerance, shade_tolerance, temperature_minimum, bloom_period, commercial_availability, fruit_seed_abundance, fruit_seed_period_begin, fruit_seed_period_end, fruit_seed_persistence, propogated_by_bare_root, propogated_by_bulbs, propogated_by_container, propogated_by_corms, propogated_by_cuttings, propogated_by_seed, propogated_by_sod, propogated_by_sprigs, propogated_by_tubers, seeds_per_pound, seed_spread_rate, seedling_vigor, small_grain, vegetative_spread_rate, berry_nut_seed_product, christmas_tree_product, fodder_product, fuelwood_product, lumber_product, naval_store_product, nursery_stock_product, palatable_browse_animal, palatable_graze_animal, palatable_human, post_product, protein_potential, pulpwood_product, veneer_product) FROM '/Users/ethanweiner/Documents/Launch_School/RB185/plant_connect/data/plants_dbimport.csv' WITH (format csv, header true, null 'NA') WHERE state LIKE '%MA%'
 -- 
