@@ -5,7 +5,6 @@ require_relative 'lib/helpers'
 require_relative 'lib/plants_storage'
 require_relative 'lib/users'
 require_relative 'lib/inventories'
-require 'pry'
 
 # CONFIGURATION
 

@@ -16,6 +16,50 @@ class PlantsStorage < DBConnection
                          temperature_minimum)
 
 
+  # search : Hash of Filters, Integer -> List of Plants
+  # Returns a list of `PAGE_LIMIT` plants starting at a given offset
+  # Only includes public plants or plants created by the current user
+  # rubocop:disable Metrics/MethodLength
+  def search_all(filters = {}, inventory_id: nil, limit: PAGE_LIMIT, page: 1, inventory_only: false)
+    # Note: Add functionality to include user-specific plants to result
+    filters = filters.reject do |_, value|
+      !value || value == ''
+    end
+
+    offset = compute_offset(page)
+    result = perform_search_query(filters, offset, limit, inventory_id, inventory_only)
+
+    # Transform tuples to Plants or InventoryPlants, dependent on whether a quantity exists
+    result.map do |tuple|
+      if (tuple["inventory_id"])
+        InventoryPlant.new(tuple, tuple["quantity"].to_i)
+      else
+        Plant.new(tuple)
+      end
+    end
+  end
+
+  # Search inventory only
+  def search_inventory(inventory_id, filters = {})
+    search_all(filters, inventory_id: inventory_id, inventory_only: true)
+  end
+
+  # rubocop:enable Metrics/MethodLength
+
+  # find_by_id : String -> Plant|InventoryPlant
+  # Returns a singular plant with the given `id`
+  def find_by_id(id, inventory_id: nil)
+    result = search_all({ "plants.id" => id }, inventory_id: inventory_id, limit: 1)
+
+    if result.empty?
+      raise NoPlantFoundError.new, "No plant found with id #{id}."
+    end
+
+    result[0]
+  end
+
+  private
+
   def perform_search_query(filters, offset, limit, inventory_id, inventory_only)
     if inventory_only # Search inventory only
       conditions, params = filters_to_conditions(filters, 4)
@@ -63,51 +107,8 @@ class PlantsStorage < DBConnection
       result = query(sql, [limit, offset] + params)
     end
   end
-  # search : Hash of Filters, Integer -> List of Plants
-  # Returns a list of `PAGE_LIMIT` plants starting at a given offset
-  # Only includes public plants or plants created by the current user
-  # rubocop:disable Metrics/MethodLength
-  def search_all(filters = {}, inventory_id: nil, limit: PAGE_LIMIT, page: 1, inventory_only: false)
-    # Note: Add functionality to include user-specific plants to result
-    filters = filters.reject do |_, value|
-      !value || value == ''
-    end
 
-    offset = compute_offset(page)
-    result = perform_search_query(filters, offset, limit, inventory_id, inventory_only)
-
-    # Transform tuples to Plants or InventoryPlants, dependent on whether a quantity exists
-    result.map do |tuple|
-      if (tuple["inventory_id"])
-        InventoryPlant.new(tuple, tuple["quantity"].to_i)
-      else
-        Plant.new(tuple)
-      end
-    end
-  end
-
-  # Search inventory only
-  def search_inventory(inventory_id, filters = {})
-    search_all(filters, inventory_id: inventory_id, inventory_only: true)
-  end
-
-  # rubocop:enable Metrics/MethodLength
-
-  # find_by_id : String -> Plant|InventoryPlant
-  # Returns a singular plant with the given `id`
-  def find_by_id(id, inventory_id: nil)
-    result = search_all({ "plants.id" => id }, inventory_id: inventory_id, limit: 1)
-
-    if result.empty?
-      raise NoPlantFoundError.new, "No plant found with id #{id}."
-    end
-
-    result[0]
-  end
-
-  private
   # Retrieves a conditions string & associated parameters for that string
-  # Just use a manual approach
   def filters_to_conditions(filters, first_placeholder)
     conditions = []
     condition_params = []
@@ -140,14 +141,6 @@ class PlantsStorage < DBConnection
     end
     
     [conditions.join(' AND '), condition_params]
-  end
-
-  def filters_to_conditions_string(filters)
-    conditions = filters.map do |key, value|
-      filter_to_condition(key, value)
-    end
-
-    conditions.join(' AND ')
   end
 
   def compute_offset(page_number)
