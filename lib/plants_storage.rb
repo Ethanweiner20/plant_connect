@@ -15,6 +15,54 @@ class PlantsStorage < DBConnection
                          precipitation_maximum
                          temperature_minimum)
 
+
+  def perform_search_query(filters, offset, limit, inventory_id, inventory_only)
+    if inventory_only # Search inventory only
+      conditions, params = filters_to_conditions(filters, 4)
+
+      sql = <<~SQL
+      SELECT plants.id AS pid, *
+      FROM plants
+        INNER JOIN inventories_plants
+        ON plants.id = inventories_plants.plant_id
+        WHERE inventory_id = $3 #{conditions.length > 0 ? 'AND' : ''} #{conditions}
+      ORDER BY scientific_name
+      LIMIT $1
+      OFFSET $2;
+      SQL
+
+      result = query(sql, [limit, offset, inventory_id] + params)
+    elsif inventory_id # Search all with inventory mixed in
+      conditions, params = filters_to_conditions(filters, 4)
+
+      sql = <<~SQL
+      SELECT plants.id AS pid, *
+      FROM plants
+        LEFT OUTER JOIN
+        (SELECT * FROM inventories_plants WHERE inventory_id = $3) AS inventory_plants
+        ON plants.id = inventory_plants.plant_id
+        #{conditions.length > 0 ? 'WHERE' : ''} #{conditions} 
+      ORDER BY scientific_name
+      LIMIT $1
+      OFFSET $2;
+      SQL
+
+      result = query(sql, [limit, offset, inventory_id] + params)
+    else # Search all
+      conditions, params = filters_to_conditions(filters, 3)
+
+      sql = <<~SQL
+      SELECT plants.id AS pid, *
+      FROM plants
+      WHERE #{conditions} 
+      ORDER BY scientific_name
+      LIMIT $1
+      OFFSET $2;
+      SQL
+
+      result = query(sql, [limit, offset] + params)
+    end
+  end
   # search : Hash of Filters, Integer -> List of Plants
   # Returns a list of `PAGE_LIMIT` plants starting at a given offset
   # Only includes public plants or plants created by the current user
@@ -25,35 +73,12 @@ class PlantsStorage < DBConnection
       !value || value == ''
     end
 
-    # We must create a string that interpolates all filters
-    first_placeholder = inventory_only ? 4 : 3
-    conditions, params = filters_to_conditions(filters, first_placeholder)
     offset = compute_offset(page)
-
-    # If the inventory is required, select only plants from inventory.
-    # Otherwise, select all publicly accessible plants.
-    where_clause = (inventory_only ?
-                   '(inventory_id IS NOT NULL AND inventory_id = $3)' :
-                   'is_public = true') +
-                   (conditions.length > 0 ? ' AND ' + conditions : '')
-
-    sql = <<~SQL
-          SELECT plants.id AS pid, * FROM plants
-            LEFT OUTER JOIN inventories_plants
-            ON plants.id = inventories_plants.plant_id
-            WHERE #{where_clause} 
-          ORDER BY scientific_name
-          LIMIT $1
-          OFFSET $2;
-          SQL
-
-    result = query(sql, [limit, offset] +
-                        (inventory_only ? [inventory_id] : []) +
-                        params)
+    result = perform_search_query(filters, offset, limit, inventory_id, inventory_only)
 
     # Transform tuples to Plants or InventoryPlants, dependent on whether a quantity exists
     result.map do |tuple|
-      if (tuple["inventory_id"] && tuple["inventory_id"].to_i == inventory_id.to_i)
+      if (tuple["inventory_id"])
         InventoryPlant.new(tuple, tuple["quantity"].to_i)
       else
         Plant.new(tuple)

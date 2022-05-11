@@ -47,16 +47,16 @@ before do
   end
 end
 
-after do
-  [@users, @plants_storage, @inventories].each(&:close_connection)
-end
-
-PROTECTED_ROUTES = ['/inventories*' '/community*', '/settings']
+PROTECTED_ROUTES = ['/inventories*', '/community', '/settings']
 
 PROTECTED_ROUTES.each do |route|
   before route do
     protected!
   end
+end
+
+after do
+  [@users, @plants_storage, @inventories].each(&:close_connection)
 end
 
 # INDEX
@@ -180,8 +180,12 @@ get '/inventories/:inventory_id' do
     redirect '/community'
   end
 
-  @title = "Inventory: #{@inventory.name}"
-  @subtitle = "Browse plants saved in your inventory."
+  if @inventory.id == @user_inventory.id
+    @title = "Your Inventory"
+    @subtitle = "Browse plants saved in your inventory." 
+  else
+    @title = "Inventory: #{@inventory.name}"
+  end
 
   filters = params.clone
   filters.delete(:page)
@@ -249,6 +253,15 @@ end
 
 get '/community' do
   @title = "Community"
+  inventory_name = params["inventory_name"] ? params["inventory_name"] : ''
+  owner_name = params["owner_name"] ? params["owner_name"] : ''
+  min_plants = if params["min_plants"] == '' || !params["min_plants"]
+                 1
+               else
+                 params["min_plants"].to_i
+               end
+  plant_id = params["plant_id"].to_i
+  @inventories_list = @inventories.search_all(inventory_name, owner_name, min_plants, plant_id)
   erb :'pages/community'
 end
 

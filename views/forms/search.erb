@@ -1,4 +1,4 @@
-<script src="/scripts/search_form.js" type="module"></script>
+<script src="/scripts/search_form.js"></script>
 <form class="plant-search" action="<%= request.path %>" method="get">
   <input type="hidden" name="page" value="1">
   <div class="container">
@@ -21,6 +21,7 @@
           <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
             Add a Filter
           </button>
+          <button type="reset" class="ms-2 btn btn-warning">Reset Filters</button>
           <ul class="dropdown-menu ">
             <li>
               <a class="dropdown-item" href="#">Taxonomy &raquo;</a>
