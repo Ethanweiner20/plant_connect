@@ -1,6 +1,6 @@
 # Stores the data for a given plant
 require_relative 'image_search'
-require_relative 'plants_storage'
+require_relative 'plants'
 
 class Plant
   attr_reader :data, :image_src

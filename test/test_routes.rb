@@ -18,7 +18,7 @@ class BloomShareTest < MiniTest::Test
   end
 
   def setup
-    @plants_storage = PlantsStorage.new
+    @plants = Plants.new
     @users = Users.new
     @inventories = Inventories.new
     # Setup database
@@ -176,7 +176,7 @@ class BloomShareTest < MiniTest::Test
 
   def test_add_plant
     post '/inventories/user', { "plant_id" => "30", "quantity" => "10" }, @user_session
-    assert_equal 10, @plants_storage.search_inventory(@inventory_id, { "plants.id" => "30" })[0].quantity
+    assert_equal 10, @plants.search_inventory(@inventory_id, { "plants.id" => "30" })[0].quantity
   end
 
   def test_add_duplicate
@@ -198,7 +198,7 @@ class BloomShareTest < MiniTest::Test
   def test_update_quantity
     plant = { id: "4", quantity: 100 }
     post '/inventories/user/4/update', plant, @user_session
-    assert_equal 100, @plants_storage.search_inventory(@inventory_id, { "plants.id" => "4" })[0].quantity
+    assert_equal 100, @plants.search_inventory(@inventory_id, { "plants.id" => "4" })[0].quantity
   end
 
   def test_update_quantity_invalid_plant
@@ -210,7 +210,7 @@ class BloomShareTest < MiniTest::Test
   def test_delete_plant
     post '/inventories/user/4/delete', {}, @user_session
     assert_equal 204, last_response.status
-    assert_equal 0, @plants_storage.search_inventory(@inventory_id, { "plants.id" => "4" }).length
+    assert_equal 0, @plants.search_inventory(@inventory_id, { "plants.id" => "4" }).length
   end
 
   def test_invalid_plant_id

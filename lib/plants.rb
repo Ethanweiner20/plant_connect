@@ -8,7 +8,7 @@ class NoPlantFoundError < StandardError
   end
 end
 
-class PlantsStorage < DBConnection
+class Plants < DBConnection
   PAGE_LIMIT = 6
 
   NUMERICAL_FILTERS = %w(precipitation_minimum

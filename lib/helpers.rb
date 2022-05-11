@@ -1,5 +1,5 @@
 require_relative 'plant'
-require_relative 'plants_storage'
+require_relative 'plants'
 require 'bundler/setup'
 require 'sinatra'
 
@@ -65,7 +65,7 @@ def verify_quantity(quantity)
 end
 
 def verify_in_inventory(inventory_id, plant_id)
-  if @plants_storage.search_inventory(inventory_id, { "plants.id" => plant_id }).empty?
+  if @plants.search_inventory(inventory_id, { "plants.id" => plant_id }).empty?
     status 400
     "This plant is not in your inventory."
   else
@@ -74,7 +74,7 @@ def verify_in_inventory(inventory_id, plant_id)
 end
 
 def verify_uniqueness(inventory_id, plant_id)
-  if @plants_storage.search_inventory(inventory_id, { "plants.id" => plant_id }).empty?
+  if @plants.search_inventory(inventory_id, { "plants.id" => plant_id }).empty?
     yield
   else
     status 400

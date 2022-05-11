@@ -2,7 +2,7 @@ require 'bundler/setup'
 require 'sinatra'
 require 'tilt/erubis'
 require_relative 'lib/helpers'
-require_relative 'lib/plants_storage'
+require_relative 'lib/plants'
 require_relative 'lib/users'
 require_relative 'lib/inventories'
 
@@ -37,7 +37,7 @@ ATTRIBUTES = {
 before do
   @users = Users.new(logger: logger)
   @user = @users.find_by_id(session[:user_id]) if session.key?(:user_id)
-  @plants_storage = PlantsStorage.new(logger: logger)
+  @plants = Plants.new(logger: logger)
   @inventories = Inventories.new(logger: logger)
   @user_inventory = @inventories.find_by_user_id(@user["id"]) if @user
   @user_inventory_id = @user_inventory.id if @user_inventory
@@ -52,7 +52,7 @@ PROTECTED_ROUTES.each do |route|
 end
 
 after do
-  [@users, @plants_storage, @inventories].each(&:close_connection)
+  [@users, @plants, @inventories].each(&:close_connection)
 end
 
 # INDEX
@@ -132,7 +132,7 @@ get '/plants' do
   @pagination_pages = pagination_pages(@page)
 
   begin
-    @plants = @plants_storage.search_all(filters,
+    @plants_list = @plants.search_all(filters,
                                         inventory_id: @user_inventory_id,
                                         page: @page)
     erb :plants
@@ -147,7 +147,7 @@ end
 
 get '/plants/:id' do
   begin
-    @plant = @plants_storage.find_by_id(params["id"], inventory_id: @user_inventory_id)
+    @plant = @plants.find_by_id(params["id"], inventory_id: @user_inventory_id)
   rescue NoPlantFoundError => e
     session[:error] = e.message
     status 400
@@ -189,7 +189,7 @@ get '/inventories/:inventory_id' do
   @pagination_pages = pagination_pages(@page)
 
   begin
-    @plants = @plants_storage.search_all(filters,
+    @plants_list = @plants.search_all(filters,
       inventory_id: @inventory.id,
       inventory_only: true,
       page: @page)
