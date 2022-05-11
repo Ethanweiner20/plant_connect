@@ -24,6 +24,10 @@ end
 
 # ROUTE HELPERS
 
+def append_page(path)
+  path.include?('?') ? path + '&page=1' : path + '?page=1'
+end
+
 def data_path
   ENV["RACK_ENV"] == "test" ? "#{ROOT}/test/data" : "#{ROOT}/data"
 end
@@ -80,11 +84,11 @@ end
 
 # Pagination helpers
 
-def set_page_number
-  if valid_page?(params[:page])
-    params[:page].to_i
+def set_page_number(page_string)
+  if valid_page?(page_string)
+    page_string.to_i
   else
-    session[:error] = "Invalid page number '#{params[:page]}'. "\
+    session[:error] = "Invalid page number '#{page_string}'. "\
                       "Showing page 1 instead."
     1
   end

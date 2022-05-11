@@ -121,29 +121,25 @@ end
 # Render form or plants list
 get '/plants' do
   @title = "Search"
-  @subtitle = "Search for plants using any number of filters."
+  @subtitle = "Search thousands of plants using any number of filters."
 
   filters = params.clone
   filters.delete(:page)
 
-  if params.empty?
+  return redirect append_page(request.fullpath) unless params.key?(:page)
+
+  @page = set_page_number(params[:page])
+  @pagination_pages = pagination_pages(@page)
+
+  begin
+    @plants = @plants_storage.search_all(filters,
+                                        inventory_id: @user_inventory_id,
+                                        page: @page)
+    erb :'pages/plants'
+  rescue PG::UndefinedColumn
+    session[:error] = "You provided a filter that doesn't exist. "\
+                      "Only use the provided filters for searching."
     erb :'forms/search'
-  elsif !params.key?(:page)
-    session[:error] = "No page was provided."
-    erb :'forms/search'
-  else
-    @page = set_page_number
-    @pagination_pages = pagination_pages(@page)
-    begin
-      @plants = @plants_storage.search_all(filters,
-                                         inventory_id: @user_inventory_id,
-                                         page: @page)
-      erb(:'forms/search') + erb(:'components/plants', layout: nil)
-    rescue PG::UndefinedColumn
-      session[:error] = "You provided a filter that doesn't exist. "\
-                        "Only use the provided filters for searching."
-      erb(:'forms/search')
-    end
   end
 end
 
@@ -187,24 +183,21 @@ get '/inventories/:inventory_id' do
   filters.delete(:page)
   filters.delete(:inventory_id)
 
-  if !params.key?(:page)
-    session[:error] = "No page was provided."
-    erb :'forms/search'
-  else
-    @page = set_page_number
-    @pagination_pages = pagination_pages(@page)
+  return redirect append_page(request.fullpath) unless params.key?(:page)
 
-    begin
-      @plants = @plants_storage.search_all(filters,
-        inventory_id: @inventory.id,
-        inventory_only: true,
-        page: @page)
-      erb(:'forms/search') + erb(:'components/plants', layout: nil)
-    rescue PG::UndefinedColumn
-      session[:error] = "You provided a filter that doesn't exist. "\
-                        "Only use the provided filters for searching."
-      erb(:'forms/search')
-    end
+  @page = set_page_number(params[:page])
+  @pagination_pages = pagination_pages(@page)
+
+  begin
+    @plants = @plants_storage.search_all(filters,
+      inventory_id: @inventory.id,
+      inventory_only: true,
+      page: @page)
+    erb :'pages/plants'
+  rescue PG::UndefinedColumn
+    session[:error] = "You provided a filter that doesn't exist. "\
+                      "Only use the provided filters for searching."
+    erb :'forms/search'
   end
 end
 
@@ -265,19 +258,3 @@ get '/settings' do
   @title = "Settings"
   erb :'pages/settings'
 end
-
-# CUSTOM PLANTS
-
-# Add plant to a user's custom plants
-# get '/users/plants/new' do
-# end
-
-# post '/users/plants' do
-# end
-
-# # Edit a custom plant
-# get '/users/plants/:id/edit' do
-# end
-
-# post '/users/plants/:id' do
-# end
