@@ -16,12 +16,22 @@ class BloomShareTest < MiniTest::Test
   end
 
   def setup
-    @sample_user = {
-      "user_id" => "abcdef",
-      "username" => "admin",
-      "num_plants_added" => "0"
-    }
-    @admin_session = { "rack.session" => { user_id: "abcdef" } }
+    @plants_storage = PlantsStorage.new
+    @users = Users.new
+    @inventories = Inventories.new
+    # Setup database
+    @user_id = @users.create("test_user", "Password1234!", @inventories)
+    @inventory_id = @inventories.find_by_user_id(@user_id).id
+
+    [1, 4, 1005, 5, 1434, 2171, 2455, 5093, 5225, 5355, 5378].each do |plant_id|
+      @inventories.add_plant(plant_id, 10, @inventory_id)
+    end
+
+    @user_session = { "rack.session" => { user_id: @user_id } }
+  end
+
+  def teardown
+    @users.clear_tables
   end
 
   def session
@@ -37,7 +47,7 @@ class BloomShareTest < MiniTest::Test
   def test_logout
     post '/logout'
 
-    assert_equal 302, last_response.status, @admin_session
+    assert_equal 302, last_response.status, @user_session
     refute session.key?(:user_id)
   end
 
@@ -45,19 +55,19 @@ class BloomShareTest < MiniTest::Test
     get '/plants'
 
     assert_equal 200, last_response.status
-    refute_includes last_response.body, '<div class="card">'
+    refute_includes last_response.body, '<div class="card'
   end
 
-  def test_plants_with_empty_filters
+  def test_plants_with_empty_filters    
     get '/plants', { "page" => "1", "common_name" => "", "scientific_name" => "" }
 
     assert_equal 200, last_response.status
-    assert_includes last_response.body, "No filters were provided."
+    assert_includes last_response.body, '<div class="card'
   end
 
   # Test plants page, some in inventory, some not
   def test_plants_with_filters
-    get '/plants', { "page" => "1", "duration" => "perennial" }, @admin_session
+    get '/plants', { "page" => "1", "duration" => "perennial" }, @user_session
 
     assert_equal 200, last_response.status
     assert_includes last_response.body, "Balsam fir"
@@ -69,7 +79,7 @@ class BloomShareTest < MiniTest::Test
 
   # Successful login: Redirects to page
   def test_successful_login
-    post '/login', { "username" => "admin", "password" => "Secret1!" }
+    post '/login', { "username" => "test_user", "password" => "Password1234!" }
 
     assert_equal 302, last_response.status
     get last_response["Location"]
@@ -78,7 +88,7 @@ class BloomShareTest < MiniTest::Test
   end
 
   def test_failure_login
-    post '/login', { "username" => "admin", "password" => "secret1!" }
+    post '/login', { "username" => "test_user", "password" => "password1234!" }
 
     assert_equal 200, last_response.status
     assert_includes last_response.body, "Invalid username or password."
@@ -86,9 +96,7 @@ class BloomShareTest < MiniTest::Test
 
   # Note: Adds user to the database
   def test_successful_signup
-    skip
-
-    post '/users', { "username" => "noah", "password" => "Noah12999" }
+    post '/users', { "username" => "noah", "password" => "Noah12999!" }
 
     assert_equal 302, last_response.status
     get last_response["Location"]
@@ -97,7 +105,7 @@ class BloomShareTest < MiniTest::Test
 
     get "/logout"
 
-    post '/login', { "username" => "noah", "password" => "Noah12999" }
+    post '/login', { "username" => "noah", "password" => "Noah12999!" }
     assert_equal 302, last_response.status
   end
 
@@ -110,19 +118,19 @@ class BloomShareTest < MiniTest::Test
   end
 
   def test_username_taken_signup
-    post '/users', { "username" => "admin", "password" => "GoodPassword123" }
+    post '/users', { "username" => "test_user", "password" => "GoodPassword123" }
 
     assert_equal 200, last_response.status
-    assert_includes last_response.body, "Username 'admin' is already taken."
+    assert_includes last_response.body, "Username 'test_user' is already taken."
   end
 
   def test_authenticated_route_success
-    get '/inventory?page=1', {}, @admin_session
+    get '/inventories/user', { "page" => "1" }, @user_session
     assert_equal 200, last_response.status
   end
 
   def test_authenticated_route_failure
-    get '/inventory?page=1', {}
+    get '/inventories/user', { "page" => "1" }
     assert_equal 302, last_response.status
 
     get last_response["Location"]
@@ -131,93 +139,76 @@ class BloomShareTest < MiniTest::Test
   end
 
   def test_plant_page_usda
-    skip
     get '/plants/4'
     assert_equal 200, last_response.status
-    assert_includes last_response.body, "silver fir"
+    assert_includes last_response.body, "Balsam fir"
     assert_includes last_response.body, "Perennial"
     assert_includes last_response.body, "+ Add Plant"
   end
 
   def test_plant_page_inventory
-    skip
-    get '/plants/4', {}, @admin_session
+    get '/plants/4', {}, @user_session
     assert_equal 200, last_response.status
-    assert_includes last_response.body, "silver fir"
+    assert_includes last_response.body, "Balsam fir"
     assert_includes last_response.body, "Perennial"
     assert_includes last_response.body, "New Amount"
   end
 
   def test_inventory_no_filters
-    skip
-    get '/inventory?page=1', {}, @admin_session
+    get '/inventories/user?page=1', {}, @user_session
     assert_equal 200, last_response.status
-    assert_includes last_response.body, "silver fir"
+    assert_includes last_response.body, "Balsam fir"
     assert_includes last_response.body, "New Amount"
   end
 
   def test_inventory_with_filters
-    skip
-    get '/inventory?page=1', { "CommonName" => "Silver" }, @admin_session
+    get '/inventories/user?page=1', { "common_name" => "Balsam" }, @user_session
     assert_equal 200, last_response.status
-    assert_includes last_response.body, "silver fir"
+    assert_includes last_response.body, "Balsam fir"
     assert_includes last_response.body, "New Amount"
 
-    get '/inventory?page=1', { "CommonName" => "1234" }, @admin_session
+    get '/inventories/user?page=1', { "common_name" => "1234" }, @user_session
     assert_equal 200, last_response.status
     assert_includes last_response.body, "No plants found."
   end
 
   def test_add_plant
-    skip
-    plant = { id: "10", quantity: 5 }
-    post '/inventory?page=1', plant, @admin_session
-    assert_includes session["user"]["inventory"]["plants"], plant
+    post '/inventories/user', { "plant_id" => "30", "quantity" => "10" }, @user_session
+    assert_equal 10, @plants_storage.search_inventory(@inventory_id, { "plants.id" => "30" })[0].quantity
   end
 
   def test_add_duplicate
-    skip
-    plant = { id: "4", quantity: 15 }
-    post '/inventory?page=1', plant, @admin_session
+    post '/inventories/user', { "plant_id" => "4" }, @user_session
     assert_equal 400, last_response.status
   end
 
   def test_add_plant_invalid_quantity
-    skip
-    plant = { id: "10", quantity: 0.5 }
-    post '/inventory?page=1', plant, @admin_session
+    post '/inventories/user/4/update', { "quantity" => "0.5" }, @user_session
     assert_equal 400, last_response.status
 
-    plant = { id: "10", quantity: -15 }
-    post '/inventory?page=1', plant, @admin_session
+    post '/inventories/user/4/update', { "quantity" => "-30" }, @user_session
     assert_equal 400, last_response.status
 
-    plant = { id: "10", quantity: "abc" }
-    post '/inventory?page=1', plant, @admin_session
+    post '/inventories/user/4/update', { "quantity" => "abc" }, @user_session
     assert_equal 400, last_response.status
   end
 
   def test_update_quantity
-    skip
     plant = { id: "4", quantity: 100 }
-    post '/inventory?page=1/4/update', plant, @admin_session
-    assert_includes session["user"]["inventory"]["plants"], plant
+    post '/inventories/user/4/update', plant, @user_session
+    assert_equal 100, @plants_storage.search_inventory(@inventory_id, { "plants.id" => "4" })[0].quantity
   end
 
   def test_update_quantity_invalid_plant
-    skip
-    plant = { id: "5", quantity: 100 }
-    post '/inventory?page=1/5/update', plant, @admin_session
+    post '/inventories/user/30/update', { "quantity": "100" }, @user_session
     assert_equal 400, last_response.status
     assert_includes last_response.body, "This plant is not in your inventory."
   end
 
   def test_delete_plant
-    skip
-    post '/inventory?page=1/4/delete', {}, @admin_session
+    post '/inventories/user/4/delete', {}, @user_session
     assert_equal 204, last_response.status
-    assert_equal 0, session["user"]["inventory"]["plants"].size
-    refute_includes session["user"]["inventory"]["plants"], @plant
+    assert_equal 0, @plants_storage.search_inventory(@inventory_id, { "plants.id" => "4" }).length
   end
 
   def test_invalid_plant_id

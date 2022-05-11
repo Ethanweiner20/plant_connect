@@ -20,13 +20,12 @@ class PlantsTest < MiniTest::Test
     @users = Users.new
     @inventories = Inventories.new
     # Setup database
-    user_id = @users.create("test_user", "Password1234!", @inventories)
-    inventory_id = @inventories.find_by_user_id(user_id).id
+    @user_id = @users.create("test_user", "Password1234!", @inventories)
+    @inventory_id = @inventories.find_by_user_id(@user_id).id
 
     [1, 4, 1005, 5, 1434, 2171, 2455, 5093, 5225, 5355, 5378].each do |plant_id|
-      @inventories.add_plant(plant_id, 10, inventory_id)
+      @inventories.add_plant(plant_id, 10, @inventory_id)
     end
-
   end
 
   def teardown
@@ -86,11 +85,9 @@ class PlantsTest < MiniTest::Test
   end
 
   def test_search_by_id
-    skip
-
-    assert_equal "white fir", @plants_storage.find_by_id(3)["common_name"]
-    assert_equal true, @plants_storage.find_by_id(2, inventory_id: 1).is_a?(InventoryPlant)
-    assert_equal false, @plants_storage.find_by_id(100, inventory_id: 1).is_a?(InventoryPlant)
+    assert_equal "Balsam fir", @plants_storage.find_by_id(4)["common_name"]
+    assert_equal true, @plants_storage.find_by_id(4, inventory_id: @inventory_id).is_a?(InventoryPlant)
+    assert_equal false, @plants_storage.find_by_id(30, inventory_id: @inventory_id).is_a?(InventoryPlant)
   end
 
   def test_pagination
@@ -102,32 +99,28 @@ class PlantsTest < MiniTest::Test
   end
 
   def test_search_all_inventory
-    skip
     # Without filters
     assert_equal PlantsStorage::PAGE_LIMIT,
-    @plants_storage.search_all(inventory_id: 1).size
+    @plants_storage.search_all(inventory_id: @inventory_id).size
     # With filters
 
     filters = { "scientific_name" => "abies" }
 
-    result = @plants_storage.search_all(filters, inventory_id: 1, inventory_only: true)
-    assert_equal 3, result.size
-
-    # With filters
+    result = @plants_storage.search_all(filters, inventory_id: @inventory_id, inventory_only: true)
+    assert_equal 5, result.size
 
     filters = { "scientific_name" => "abies" }
 
-    result = @plants_storage.search_inventory(1, filters)
-    assert_equal 3, result.size
+    result = @plants_storage.search_inventory(@inventory_id, filters)
+    assert_equal 5, result.size
   end
 
   def test_search_with_inventory
-    skip
     filters = { "foliage_color" => ["Green"] }
 
-    results = @plants_storage.search_all(filters, inventory_id: 1)
+    results = @plants_storage.search_all(filters, inventory_id: @inventory_id)
     assert_equal PlantsStorage::PAGE_LIMIT, results.size
-    assert_equal 4, results.select { |plant| plant.is_a? InventoryPlant }.size
+    assert_equal 3, results.select { |plant| plant.is_a? InventoryPlant }.size
   end
   # rubocop:enable Metrics/LineLength
 end
