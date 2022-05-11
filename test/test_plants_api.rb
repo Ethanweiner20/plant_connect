@@ -91,8 +91,8 @@ class PlantsTest < MiniTest::Test
   end
 
   def test_states
-    assert_equal("AK, AZ, CO, CT, GA, IA, ID, IN, MA, MD, ME, MI, MN, MT, NC, "+ 
-                 "NH, NM, NV, NY, OH, OR, PA, RI, TN, UT, VA, VT, WA, WI, WV, "+
+    assert_equal("AK, AZ, CO, CT, GA, IA, ID, IN, MA, MD, ME, MI, MN, MT, NC, "\
+                 "NH, NM, NV, NY, OH, OR, PA, RI, TN, UT, VA, VT, WA, WI, WV, "\
                  "WY", @plants.find_by_id(1).states)
   end
 
@@ -115,7 +115,7 @@ class PlantsTest < MiniTest::Test
   def test_search_all_inventory
     # Without filters
     assert_equal Plants::PAGE_LIMIT,
-    @plants.search_all(inventory_id: @inventory_id).size
+                 @plants.search_all(inventory_id: @inventory_id).size
     # With filters
 
     filters = { "scientific_name" => "abies" }

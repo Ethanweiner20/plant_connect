@@ -13,7 +13,8 @@ require_relative '../lib/plant'
 
 class ImageSearchTest < MiniTest::Test
   def test_image_search
-    data = { "scientific_name" => "hosta sieboldiana", "common_name" => "Hosta" }
+    data = { "scientific_name" => "hosta sieboldiana",
+             "common_name" => "Hosta" }
     plant = Plant.new(data)
     assert plant.image_src
   end

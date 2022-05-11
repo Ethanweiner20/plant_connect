@@ -60,8 +60,9 @@ class BloomShareTest < MiniTest::Test
     refute_includes last_response.body, '<div class="card'
   end
 
-  def test_plants_with_empty_filters    
-    get '/plants', { "page" => "1", "common_name" => "", "scientific_name" => "" }
+  def test_plants_with_empty_filters
+    get '/plants',
+        { "page" => "1", "common_name" => "", "scientific_name" => "" }
 
     assert_equal 200, last_response.status
     assert_includes last_response.body, '<div class="card'
@@ -116,11 +117,13 @@ class BloomShareTest < MiniTest::Test
 
     assert_equal 200, last_response.status
     assert_includes last_response.body, "Password must contain at least 8 "\
-                                        "characters, a number, and uppercase letter."
+                                        "characters, a number, and uppercase "\
+                                        "letter."
   end
 
   def test_username_taken_signup
-    post '/users', { "username" => "test_user", "password" => "GoodPassword123" }
+    post '/users',
+         { "username" => "test_user", "password" => "GoodPassword123" }
 
     assert_equal 200, last_response.status
     assert_includes last_response.body, "Username 'test_user' is already taken."
@@ -175,8 +178,11 @@ class BloomShareTest < MiniTest::Test
   end
 
   def test_add_plant
-    post '/inventories/user', { "plant_id" => "30", "quantity" => "10" }, @user_session
-    assert_equal 10, @plants.search_inventory(@inventory_id, { "plants.id" => "30" })[0].quantity
+    post '/inventories/user', { "plant_id" => "30", "quantity" => "10" },
+         @user_session
+    assert_equal 10,
+                 @plants.search_inventory(@inventory_id,
+                                          { "plants.id" => "30" })[0].quantity
   end
 
   def test_add_duplicate
@@ -198,7 +204,9 @@ class BloomShareTest < MiniTest::Test
   def test_update_quantity
     plant = { id: "4", quantity: 100 }
     post '/inventories/user/4/update', plant, @user_session
-    assert_equal 100, @plants.search_inventory(@inventory_id, { "plants.id" => "4" })[0].quantity
+    assert_equal 100,
+                 @plants.search_inventory(@inventory_id,
+                                          { "plants.id" => "4" })[0].quantity
   end
 
   def test_update_quantity_invalid_plant
@@ -210,7 +218,9 @@ class BloomShareTest < MiniTest::Test
   def test_delete_plant
     post '/inventories/user/4/delete', {}, @user_session
     assert_equal 204, last_response.status
-    assert_equal 0, @plants.search_inventory(@inventory_id, { "plants.id" => "4" }).length
+    assert_equal 0,
+                 @plants.search_inventory(@inventory_id,
+                                          { "plants.id" => "4" }).length
   end
 
   def test_invalid_plant_id
@@ -225,10 +235,11 @@ class BloomShareTest < MiniTest::Test
   # Test inventory viewing
   def test_nonexistent_inventory
     get '/inventories/100', { "page" => "1" }, @user_session
-    
+
     assert_equal 302, last_response.status
 
     get last_response["Location"]
-    assert_includes last_response.body, "No public inventory with the id '100' exists."
+    assert_includes last_response.body,
+                    "No public inventory with the id '100' exists."
   end
 end

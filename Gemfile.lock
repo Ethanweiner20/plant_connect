@@ -90,7 +90,7 @@ DEPENDENCIES
   puma
   rack-test
   rake
-  rubocop (= 0.86.0)
+  rubocop
   simplecov
   sinatra
   sinatra-contrib
