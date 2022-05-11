@@ -10,6 +10,7 @@ Minitest::Reporters.use!
 require "rack/test"
 require_relative '../app'
 
+# rubocop:disable Metrics/AbcSize
 class BloomShareTest < MiniTest::Test
   include Rack::Test::Methods
 
@@ -56,8 +57,9 @@ class BloomShareTest < MiniTest::Test
   def test_plants
     get '/plants'
 
-    assert_equal 200, last_response.status
-    refute_includes last_response.body, '<div class="card'
+    assert_equal 302, last_response.status
+    get last_response["Location"]
+    assert_includes last_response.body, '<div class="card'
   end
 
   def test_plants_with_empty_filters
@@ -87,6 +89,9 @@ class BloomShareTest < MiniTest::Test
     assert_equal 302, last_response.status
     get last_response["Location"]
 
+    assert_equal 302, last_response.status
+    get last_response["Location"]
+
     assert_equal 200, last_response.status
   end
 
@@ -100,6 +105,9 @@ class BloomShareTest < MiniTest::Test
   # Note: Adds user to the database
   def test_successful_signup
     post '/users', { "username" => "noah", "password" => "Noah12999!" }
+
+    assert_equal 302, last_response.status
+    get last_response["Location"]
 
     assert_equal 302, last_response.status
     get last_response["Location"]
@@ -161,19 +169,22 @@ class BloomShareTest < MiniTest::Test
 
   def test_inventory_no_filters
     get '/inventories/user', {}, @user_session
-    assert_equal 200, last_response.status
+    assert_equal 302, last_response.status
+    get last_response["Location"]
     assert_includes last_response.body, "Balsam fir"
     assert_includes last_response.body, "New Amount"
   end
 
   def test_inventory_with_filters
     get '/inventories/user', { "common_name" => "Balsam" }, @user_session
-    assert_equal 200, last_response.status
+    assert_equal 302, last_response.status
+    get last_response["Location"]
     assert_includes last_response.body, "Balsam fir"
     assert_includes last_response.body, "New Amount"
 
     get '/inventories/user', { "common_name" => "1234" }, @user_session
-    assert_equal 200, last_response.status
+    assert_equal 302, last_response.status
+    get last_response["Location"]
     assert_includes last_response.body, "No plants found."
   end
 
@@ -243,3 +254,4 @@ class BloomShareTest < MiniTest::Test
                     "No public inventory with the id '100' exists."
   end
 end
+# rubocop:enable Metrics/AbcSize
