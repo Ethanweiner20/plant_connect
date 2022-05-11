@@ -90,6 +90,20 @@ class PlantsTest < MiniTest::Test
     assert_equal false, @plants_storage.find_by_id(30, inventory_id: @inventory_id).is_a?(InventoryPlant)
   end
 
+  def test_states
+    assert_equal("AK, AZ, CO, CT, GA, IA, ID, IN, MA, MD, ME, MI, MN, MT, NC, "+ 
+                 "NH, NM, NV, NY, OH, OR, PA, RI, TN, UT, VA, VT, WA, WI, WV, "+
+                 "WY", @plants_storage.find_by_id(1).states)
+  end
+
+  def test_colors
+    assert_equal(['Yellow', 'Green', 'Brown'], @plants_storage.find_by_id(4).colors)
+  end
+
+  def test_search_invalid_plant_id
+    assert_raises(NoPlantFoundError) { @plants_storage.find_by_id(1000000) }
+  end
+
   def test_pagination
     filters = { "genus" => "Acer" }
     assert_equal PlantsStorage::PAGE_LIMIT, @plants_storage.search_all(filters, page: 2).size

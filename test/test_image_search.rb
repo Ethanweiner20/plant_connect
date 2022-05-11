@@ -1,3 +1,5 @@
+require 'simplecov'
+
 ENV["RACK_ENV"] = "test"
 
 require 'minitest/autorun'

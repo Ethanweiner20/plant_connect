@@ -1,3 +1,5 @@
+require 'simplecov'
+
 ENV["RACK_ENV"] = "test"
 
 require 'minitest/autorun'
@@ -218,5 +220,15 @@ class BloomShareTest < MiniTest::Test
 
     get '/plants/1000000'
     assert_equal 400, last_response.status
+  end
+
+  # Test inventory viewing
+  def test_nonexistent_inventory
+    get '/inventories/100', { "page" => "1" }, @user_session
+    
+    assert_equal 302, last_response.status
+
+    get last_response["Location"]
+    assert_includes last_response.body, "No public inventory with the id '100' exists."
   end
 end
