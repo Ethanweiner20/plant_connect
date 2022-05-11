@@ -36,15 +36,12 @@ ATTRIBUTES = {
 # FILTERS
 
 before do
-  # session.delete(:next_path)
   @users = Users.new(logger: logger)
   @user = @users.find_by_id(session[:user_id]) if session.key?(:user_id)
   @plants_storage = PlantsStorage.new(logger: logger)
   @inventories = Inventories.new(logger: logger)
-  if @user
-    @user_inventory = @inventories.find_by_user_id(@user["id"])
-    @inventory_id = @user_inventory.id
-  end
+  @user_inventory = @inventories.find_by_user_id(@user["id"]) if @user
+  @user_inventory_id = @user_inventory.id if @user_inventory
 end
 
 PROTECTED_ROUTES = ['/inventories*', '/community', '/settings']
@@ -90,7 +87,7 @@ post '/login' do
   begin
     user_id = @users.authenticate(username, password)
     session[:user_id] = user_id
-    redirect session[:next_path]
+    redirect session[:next_path] ? session[:next_path] : '/inventories/user?page=1'
   rescue InvalidLoginCredentialsError => e
     session[:error] = e.message
     @username = username
@@ -140,7 +137,7 @@ get '/plants' do
     @pagination_pages = pagination_pages(@page)
     begin
       @plants = @plants_storage.search_all(filters,
-                                         inventory_id: @inventory_id,
+                                         inventory_id: @user_inventory_id,
                                          page: @page)
       erb(:'forms/search') + erb(:'components/plants', layout: nil)
     rescue PG::UndefinedColumn
@@ -155,7 +152,7 @@ end
 
 get '/plants/:id' do
   begin
-    @plant = @plants_storage.find_by_id(params["id"])
+    @plant = @plants_storage.find_by_id(params["id"], inventory_id: @user_inventory_id)
   rescue NoPlantFoundError => e
     session[:error] = e.message
     status 400
@@ -180,7 +177,7 @@ get '/inventories/:inventory_id' do
     redirect '/community'
   end
 
-  if @inventory.id == @user_inventory.id
+  if @inventory.id == @user_inventory_id
     @title = "Your Inventory"
     @subtitle = "Browse plants saved in your inventory." 
   else
@@ -214,11 +211,11 @@ end
 
 # [AJAX] Add a plant to a user's inventory
 post '/inventories/user' do
-  verify_uniqueness(@inventory_id, params["plant_id"]) do
+  verify_uniqueness(@user_inventory_id, params["plant_id"]) do
     verify_quantity(params["quantity"]) do |quantity|
       plant_id = params["plant_id"].to_i
       quantity = params["quantity"].to_i
-      inventory_id = @inventory_id
+      inventory_id = @user_inventory_id
       @inventories.add_plant(plant_id, quantity, inventory_id)
       status 204
     end
@@ -227,12 +224,11 @@ end
 
 # [AJAX] Update quantity of plant in inventory
 post '/inventories/user/:plant_id/update' do
-  verify_in_inventory(@inventory_id, params["plant_id"]) do
+  verify_in_inventory(@user_inventory_id, params["plant_id"]) do
     verify_quantity(params["quantity"]) do |quantity|
       plant_id = params["plant_id"].to_i
       quantity = params["quantity"].to_i
-      inventory_id = @inventory_id
-      @inventories.update_plant_quantity(plant_id, quantity, inventory_id)
+      @inventories.update_plant_quantity(plant_id, quantity, @user_inventory_id)
       status 204
     end
   end
@@ -241,10 +237,9 @@ end
 # [AJAX] Delete plant from inventory
 # Note: Simply disregards faulty ids
 post '/inventories/user/:plant_id/delete' do
-  verify_in_inventory(@inventory_id, params["plant_id"]) do
+  verify_in_inventory(@user_inventory_id, params["plant_id"]) do
     plant_id = params["plant_id"].to_i
-    inventory_id = @inventory_id
-    @inventories.delete_plant(plant_id, inventory_id)
+    @inventories.delete_plant(plant_id, @user_inventory_id)
     status 204
   end
 end
