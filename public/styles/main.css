@@ -5,7 +5,7 @@ html, body {
 .main-container {
   min-height: 100%;
   position: relative;
-  padding-bottom: 130px;
+  padding-bottom: 240px;
 }
 
 .card a {
