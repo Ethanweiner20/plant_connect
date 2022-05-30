@@ -1,6 +1,7 @@
 require 'bundler/setup'
 require 'sinatra'
 require 'tilt/erubis'
+require 'dotenv/load'
 require_relative 'lib/helpers'
 require_relative 'lib/plants'
 require_relative 'lib/users'
@@ -10,7 +11,7 @@ require_relative 'lib/inventories'
 
 configure do
   enable :sessions
-  set :session_secret, "secret"
+  set :session_secret, ENV['SESSION_SECRET']
   set :erb, escape_html: true
 end
 

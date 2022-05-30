@@ -105,7 +105,7 @@ def retrieve_page_number(page_string)
   end
 end
 
-def pagination_pages(current_page_number, num_pages: 4)
+def pagination_pages(current_page_number, num_pages: 3)
   multiplier = (current_page_number - 1) / num_pages
   start = (multiplier * num_pages) + 1
   (start...start + num_pages).to_a
