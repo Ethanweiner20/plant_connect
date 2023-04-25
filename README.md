@@ -1,6 +1,6 @@
 # BloomShare
 
-Please read this README. It contains important information about how to test BloomShare during its beta phase.
+[BloomShare](https://bloom-share.herokuapp.com/) is a community-oriented plant query tool and inventory manager, built with Ruby, Sinatra, PostgreSQL, and Heroku.
 
 ## Beta Experimentation
 
