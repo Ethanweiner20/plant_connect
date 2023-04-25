@@ -1,4 +1,4 @@
-# BloomShare
+# BloomShare 🌸
 
 [BloomShare](https://bloom-share.herokuapp.com/) is a community-oriented plant query tool and inventory manager, built with Ruby, Sinatra, PostgreSQL, and Heroku.
 
